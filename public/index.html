@@ -3032,17 +3032,25 @@ document.addEventListener('keydown', function(e) {
 /* ── 전체 데이터 로드 ── */
 async function loadAllHotplaces() {
   showHpSkeleton();
+
   try {
     const res = await fetch('/api/restaurants');
-const data = await res.json();
-    if (data.success && Array.isArray(data.places)) {
-      hp.allPlaces = data.places;
+    const data = await res.json();
+
+    if (data.success && Array.isArray(data.rows)) {
+      hp.allPlaces = data.rows;
     } else {
-      // 백엔드 미연결 시 데모 데이터 사용
-     
+      hp.allPlaces = [];
     }
-    loadHotPlacesFromDB();
-  } catch {
+  } catch (err) {
+    console.error('핫플 DB 로드 실패:', err);
+    hp.allPlaces = [];
+  }
+
+  hp.loaded = true;
+  buildDistrictSidebar();
+  applyHpFilters();
+}
   async function loadHotPlacesFromDB() {
   try {
     const res = await fetch('/api/restaurants');
@@ -3066,11 +3074,11 @@ const data = await res.json();
     hp.allPlaces = [];
   }
 }
-  }
+  
   hp.loaded = true;
   buildDistrictSidebar();
   applyHpFilters();
-}
+
 
 /* ── 데모 데이터 (백엔드 없을 때) ── */
 function generateDemoPlaces() {
