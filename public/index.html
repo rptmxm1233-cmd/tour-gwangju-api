@@ -3037,11 +3037,11 @@ async function loadAllHotplaces() {
     const res = await fetch('/api/restaurants');
     const data = await res.json();
 
-    if (data.success && Array.isArray(data.rows)) {
-      hp.allPlaces = data.rows;
-    } else {
-      hp.allPlaces = [];
-    }
+   if (data.success && Array.isArray(data.rows)) {
+  hp.allPlaces = data.rows;
+} else {
+  hp.allPlaces = [];
+}
   } catch (err) {
     console.error('핫플 DB 로드 실패:', err);
     hp.allPlaces = [];
@@ -3154,26 +3154,29 @@ function buildStationSidebar() {
 function applyHpFilters() {
   let list = [...hp.allPlaces];
 
-  // 카테고리
-  if (hp.category !== '전체') list = list.filter(p => (p.category||'').includes(hp.category) || (p.place_type||'').includes(hp.category));
-  // 구
+  if (hp.category !== '전체') {
+  list = list.filter(p =>
+    (p.category || '').includes(hp.category) ||
+    (p.place_type || '').includes(hp.category) ||
+    (p.theme_tags || '').includes(hp.category)
+  );
+}
+
   if (hp.district !== '전체') list = list.filter(p => p.district === hp.district);
-  // 역
   if (hp.stationFilter !== '전체') list = list.filter(p => p.station_name === hp.stationFilter);
-  // 키워드
+
   if (hp.keyword) {
     const kw = hp.keyword.toLowerCase();
     list = list.filter(p =>
-      (p.place_name||'').toLowerCase().includes(kw) ||
-      (p.address||'').toLowerCase().includes(kw) ||
-      (p.station_name||'').toLowerCase().includes(kw) ||
-      (p.category||'').toLowerCase().includes(kw)
+      (p.place_name || '').toLowerCase().includes(kw) ||
+      (p.address || '').toLowerCase().includes(kw) ||
+      (p.station_name || '').toLowerCase().includes(kw) ||
+      (p.category || '').toLowerCase().includes(kw)
     );
   }
 
-  // 정렬
-  if (hp.sort === 'score') list.sort((a,b) => (b.date_score||0)-(a.date_score||0));
-  else list.sort((a,b) => (a.place_name||'').localeCompare(b.place_name||'', 'ko'));
+  if (hp.sort === 'score') list.sort((a,b) => (b.date_score || 0) - (a.date_score || 0));
+  else list.sort((a,b) => (a.place_name || '').localeCompare(b.place_name || '', 'ko'));
 
   hp.filtered = list;
   hp.page = 1;
@@ -3183,7 +3186,6 @@ function applyHpFilters() {
   renderHpGrid();
   renderHpPagination();
 }
-
 /* ── 그리드 렌더링 ── */
 function renderHpGrid() {
   const grid = document.getElementById('hpGrid');

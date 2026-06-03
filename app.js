@@ -23,6 +23,7 @@ const pool = mysql.createPool({
 });
 app.get('/api/restaurants', async (req, res) => {
   try {
+
     const [rows] = await pool.query(`
       SELECT *
       FROM places_unique
@@ -33,12 +34,14 @@ app.get('/api/restaurants', async (req, res) => {
       success: true,
       rows
     });
+
   } catch (err) {
-    console.error(err);
+
     res.json({
       success: false,
       error: err.message
     });
+
   }
 });
 app.get('/api/stations', async (req, res) => {
