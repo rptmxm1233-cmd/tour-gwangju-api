@@ -2426,11 +2426,31 @@ async function loadPlaces() {
     </div>`;
 
   const lineName = currentLine === 1 ? '1호선' : '2호선';
-  let url = `/api/places?station_name=${encodeURIComponent(s.station_name)}&line_name=${encodeURIComponent(lineName)}`;
-  if (currentFilter !== '전체') url += `&category=${encodeURIComponent(currentFilter)}`;
 
-  const data = await apiFetch(url);
-  console.log('API 요청 주소:', url);
+const stationName = s.station_name;
+const stationNameWithYeok = stationName.endsWith('역')
+  ? stationName
+  : stationName + '역';
+
+let url1 = `/api/places?station_name=${encodeURIComponent(stationName)}&line_name=${encodeURIComponent(lineName)}`;
+let url2 = `/api/places?station_name=${encodeURIComponent(stationNameWithYeok)}&line_name=${encodeURIComponent(lineName)}`;
+
+if (currentFilter !== '전체') {
+  url1 += `&category=${encodeURIComponent(currentFilter)}`;
+  url2 += `&category=${encodeURIComponent(currentFilter)}`;
+}
+
+const data1 = await apiFetch(url1);
+const data2 = await apiFetch(url2);
+
+const mergedData = [
+  ...(Array.isArray(data1) ? data1 : []),
+  ...(Array.isArray(data2) ? data2 : [])
+];
+
+const data = Array.from(
+  new Map(mergedData.map(place => [place.place_id, place])).values()
+);
 console.log('API에서 받은 맛집 데이터:', data);
 
 document.getElementById('mapStationDesc').textContent =
