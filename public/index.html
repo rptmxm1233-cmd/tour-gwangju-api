@@ -88,12 +88,40 @@
 
   /* 지도 */
   .map-area { flex: 1; position: relative; overflow: hidden; }
-  .map-header { position: absolute; top: 0; left: 0; right: 0; padding: 16px 20px; z-index: 20; display: flex; align-items: flex-start; justify-content: space-between; }
-  .map-station-info { background: white; border-radius: var(--radius); padding: 12px 16px; box-shadow: var(--shadow-lg); min-width: 220px; }
+  .map-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  z-index: 999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  pointer-events: none;
+}
   .map-station-info .loc-icon { font-size: 11px; color: var(--line1); font-weight: 700; margin-bottom: 2px; }
   .map-station-info h2 { font-size: 18px; font-weight: 900; color: var(--text); line-height: 1.2; }
   .map-station-info .sub-desc { font-size: 11px; color: var(--gray4); margin-top: 2px; }
-  .map-detail-btn { background: white; border: none; border-radius: var(--radius); padding: 12px 16px; box-shadow: var(--shadow-lg); font-size: 12px; font-family: 'Noto Sans KR', sans-serif; font-weight: 600; color: var(--line1); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .2s; }
+ .map-detail-btn {
+  background: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-lg);
+  font-size: 12px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 600;
+  color: var(--line1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .2s;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1000;
+}
   .map-detail-btn:hover { background: var(--line1); color: white; }
   .map-legend { position: absolute; bottom: 16px; left: 16px; background: white; border-radius: 10px; padding: 10px 14px; box-shadow: var(--shadow); display: flex; gap: 14px; font-size: 11px; z-index: 20; }
   .legend-item { display: flex; align-items: center; gap: 5px; color: var(--text2); }
