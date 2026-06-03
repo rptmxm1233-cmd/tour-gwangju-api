@@ -3183,9 +3183,13 @@ grid.querySelectorAll('.hp-card').forEach(card => {
 
     if (!place) return;
 
-    const url = place.naver_place_search_url
-      || `https://map.naver.com/p/search/${encodeURIComponent((place.place_name || '') + ' ' + (place.address || '광주'))}`;
+    let url = place.naver_place_search_url;
 
+if (!url || url.trim() === '') {
+    url = `https://map.naver.com/p/search/${encodeURIComponent(
+        `${place.place_name} ${place.station_name || ''}`
+    )}`;
+}
     window.open(url, '_blank');
   });
 });
