@@ -1835,6 +1835,35 @@
   </div>
 </div>
 <div class="modal-bg" id="myPageModal">
+  <div class="modal-bg" id="stationInfoModal">
+  <div class="welcome-modal">
+
+    <div class="welcome-icon">🚇</div>
+
+    <h2 id="stationModalTitle">역 정보</h2>
+
+    <p id="stationModalDesc">
+      역 정보를 불러오는 중...
+    </p>
+
+    <div class="welcome-actions">
+
+      <div class="welcome-card" onclick="openStationNaver()">
+        <div class="big">🗺️</div>
+        <b>네이버 지도</b>
+        <span>주변 정보 보기</span>
+      </div>
+
+      <div class="welcome-card" onclick="closeStationModal()">
+        <div class="big">❌</div>
+        <b>닫기</b>
+        <span>이전 화면으로</span>
+      </div>
+
+    </div>
+
+  </div>
+</div>
   <div class="mypage-modal">
     <button class="close-modal" onclick="closeMyPage()">×</button>
 
@@ -2737,6 +2766,7 @@ function renderStationCard() {
       </div>
       <div style="margin-top:6px;font-size:10px;opacity:.75;">${s.address}</div>
     </div>
+    
   `;
 }
 
@@ -3003,10 +3033,41 @@ function resetPanel() {
   document.getElementById('mapLocIcon').textContent = '🚇 노선도';
 }
 
+let currentStationInfo = null;
+
 function showDetail() {
-  if (!selectedStation) { alert('역을 먼저 선택해 주세요.'); return; }
-  const s = selectedStation;
-  alert(`${s.station_name}역\n코드: ${s.station_code}\n주소: ${s.address}\n개통일: ${s.open_date}${s.is_transfer ? '\n환승역' : ''}`);
+  if (!selectedStation) {
+    showToast('역을 먼저 선택해 주세요.', 'error');
+    return;
+  }
+
+  currentStationInfo = selectedStation;
+
+  document.getElementById('stationModalTitle').innerText =
+    `${selectedStation.station_name}역`;
+
+  document.getElementById('stationModalDesc').innerHTML =
+    `
+    🚇 ${currentLine === 1 ? '1호선' : '2호선'}<br>
+    🏷️ 역 코드: ${selectedStation.station_code || '-'}<br>
+    📍 지역: ${selectedStation.district || '-'}<br>
+    ${selectedStation.is_transfer ? '🔄 환승역<br>' : ''}
+    `;
+
+  document.getElementById('stationInfoModal').classList.add('show');
+}
+
+function closeStationModal() {
+  document.getElementById('stationInfoModal').classList.remove('show');
+}
+
+function openStationNaver() {
+  if (!currentStationInfo) return;
+
+  window.open(
+    `https://map.naver.com/p/search/${encodeURIComponent(currentStationInfo.station_name + '역')}`,
+    '_blank'
+  );
 }
 
 
