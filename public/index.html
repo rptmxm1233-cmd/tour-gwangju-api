@@ -401,7 +401,51 @@
   font-weight: 700;
   display: none;
 }
+.signup-success-modal {
+  width: 390px;
+  background: white;
+  border-radius: 24px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 24px 70px rgba(0,0,0,.28);
+  animation: pop .22s ease;
+}
 
+.signup-success-icon {
+  width: 74px;
+  height: 74px;
+  margin: 0 auto 16px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--line1), var(--line2));
+  color: white;
+  font-size: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signup-success-modal h2 {
+  font-size: 23px;
+  margin-bottom: 8px;
+}
+
+.signup-success-modal p {
+  font-size: 13px;
+  color: var(--gray4);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.signup-success-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 14px;
+  background: var(--line1);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
 .shake {
   animation: shake .35s ease;
 }
@@ -2157,10 +2201,9 @@ function submitAuth() {
     users.push(newUser);
     saveUsers(users);
 
-    alert('회원가입 완료! 로그인해주세요.');
-    authMode = 'login';
-    updateAuthModal();
-    return;
+    closeAuthModal();
+openSignupSuccessModal();
+return;
   }
 
   const user = users.find(user => user.id === id && user.pw === pw);
@@ -2195,6 +2238,15 @@ openWelcomeModal();
 if (currentPlaces.length > 0) {
   renderPlaces(currentPlaces);
 }
+}
+function openSignupSuccessModal() {
+  document.getElementById('signupSuccessModal').classList.add('show');
+}
+
+function closeSignupSuccessModal() {
+  document.getElementById('signupSuccessModal').classList.remove('show');
+  authMode = 'login';
+  updateAuthModal();
 }
 function updateLoginUI() {
   const btn = document.getElementById('loginBtn');
@@ -3474,5 +3526,16 @@ window.addEventListener('load', function() {
   if (typeof setActiveNav === 'function') setActiveNav('홈');
 });
 </script>
+<div class="modal-bg" id="signupSuccessModal">
+  <div class="signup-success-modal">
+    <div class="signup-success-icon">🎉</div>
+    <h2>회원가입 완료!</h2>
+    <p>
+      TOUR GWANGJU 가입이 완료되었어요.<br>
+      이제 로그인해서 즐겨찾기와 추천 장소를 저장해보세요.
+    </p>
+    <button class="signup-success-btn" onclick="closeSignupSuccessModal()">로그인하러 가기</button>
+  </div>
+</div>
 </body>
 </html>
