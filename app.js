@@ -26,7 +26,7 @@ app.get('/api/restaurants', async (req, res) => {
 
     const [rows] = await pool.query(`
       SELECT *
-      FROM gwangju_subway_places_final
+      FROM places_unique
       LIMIT 20
     `);
 
@@ -51,10 +51,10 @@ app.get('/api/stations', async (req, res) => {
     const lineName = lineMap[line_id];
     let sql, params = [];
     if (lineName) {
-      sql = 'SELECT station_name, line_name, district FROM gwangju_subway_places_final WHERE line_name = ? GROUP BY station_name, line_name, district';
+      sql = 'SELECT station_name, line_name, district FROM places_unique WHERE line_name = ? GROUP BY station_name, line_name, district';
       params = [lineName];
     } else {
-      sql = 'SELECT station_name, line_name, district FROM gwangju_subway_places_final GROUP BY station_name, line_name, district';
+      sql = 'SELECT station_name, line_name, district FROM places_unique GROUP BY station_name, line_name, district';
     }
     const [rows] = await pool.query(sql, params);
     res.json({ success: true, count: rows.length, stations: rows });
@@ -90,7 +90,7 @@ app.get('/api/places', async (req, res) => {
     longitude,
     image_url,
     naver_place_search_url
-  FROM gwangju_subway_places_final
+  FROM places_unique
   WHERE line_name = ?
     AND station_name = ?
   ORDER BY place_id ASC
