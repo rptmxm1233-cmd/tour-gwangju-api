@@ -1774,7 +1774,7 @@
         <h2 id="mapStationName">역을 선택해 주세요</h2>
         <div class="sub-desc" id="mapStationDesc">역을 클릭하면 주변 맛집·관광 정보를 확인할 수 있어요</div>
       </div>
-      <button class="map-detail-btn" onclick="showDetail()">📋 역 정보 보기</button>
+      <button class="map-detail-btn" id="stationDetailBtn" type="button">📋 역 정보 보기</button>
     </div>
 
     <div id="kakaoMap" style="position:absolute;top:80px;left:0;right:0;bottom:0;width:100%;height:calc(100% - 80px);z-index:1;"></div>
@@ -3585,6 +3585,17 @@ window.addEventListener('load', function() {
   if (homeOverlay) homeOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
   if (typeof setActiveNav === 'function') setActiveNav('홈');
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('stationDetailBtn');
+
+  if (btn) {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      showDetail();
+    });
+  }
 });
 </script>
 <div class="modal-bg" id="signupSuccessModal">
