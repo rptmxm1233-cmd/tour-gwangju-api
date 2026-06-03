@@ -27,7 +27,7 @@ app.get('/api/restaurants', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT *
       FROM places_unique
-      LIMIT 20
+      ORDER BY place_id ASC
     `);
 
     res.json({
