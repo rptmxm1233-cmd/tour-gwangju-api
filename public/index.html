@@ -3039,7 +3039,7 @@ const data = await res.json();
       hp.allPlaces = data.places;
     } else {
       // 백엔드 미연결 시 데모 데이터 사용
-      hp.allPlaces = generateDemoPlaces();
+     
     }
   } catch {
     hp.allPlaces = generateDemoPlaces();
