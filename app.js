@@ -91,17 +91,9 @@ app.get('/api/places', async (req, res) => {
     naver_place_search_url
   FROM places_unique
   WHERE line_name = ?
-    AND (
-      station_name = ?
-      OR station_name = CONCAT(?, '역')
-      OR REPLACE(station_name, '역', '') = ?
-    )
-  ${category ? `AND (category = ? OR place_type = ? OR theme_tags LIKE ?)` : ''}
+    AND station_name = ?
   ORDER BY place_id ASC
-`, category
-  ? [line_name, station_name, station_name, station_name, category, category, `%${category}%`]
-  : [line_name, station_name, station_name, station_name]
-);
+`, [line_name, station_name]);
 
 res.json(rows);
   } catch (err) {
