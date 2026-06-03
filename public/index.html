@@ -2515,6 +2515,7 @@ function drawPlaceMarkers(places) {
   if (!kakaoMap || !places || places.length === 0) return;
 
   currentPlaces = places.slice(0, 20);
+  
 
   currentPlaces.forEach((place, index) => {
     const addMarker = (position) => {
@@ -2556,6 +2557,15 @@ function getDistance(lat1, lng1, lat2, lng2) {
 function renderPlaces(places) {
   const list = document.getElementById('placeList');
   currentPlaces = places.slice(0, 20);
+  const filteredPlaces = currentFilter === '전체'
+  ? places
+  : places.filter(p =>
+      (p.category || '').includes(currentFilter) ||
+      (p.place_type || '').includes(currentFilter)
+    );
+
+currentPlaces = filteredPlaces.slice(0, 20);
+places = filteredPlaces;
 
   document.getElementById('panelTitle').textContent =
     `${selectedStation.station_name}역 주변 ${currentFilter === '전체' ? '데이트 장소' : currentFilter} ${places.length}곳`;
@@ -3164,11 +3174,33 @@ function renderHpGrid() {
   }
 
   grid.className = `hp-grid${hp.viewMode === 'list' ? ' list-view' : ''}`;
-  grid.innerHTML = pageData.map((p, i) => renderHpCard(p, i, kw)).join('');
-  // 스크롤 맨 위로
-  document.getElementById('hpGridWrap').scrollTo({ top: 0, behavior: 'smooth' });
-}
+grid.innerHTML = pageData.map((p, i) => renderHpCard(p, i, kw)).join('');
 
+grid.querySelectorAll('.hp-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const placeId = Number(card.dataset.placeId);
+    const place = pageData.find(p => Number(p.place_id) === placeId);
+
+    if (!place) return;
+
+    const url = place.naver_place_search_url
+      || `https://map.naver.com/p/search/${encodeURIComponent((place.place_name || '') + ' ' + (place.address || '광주'))}`;
+
+    window.open(url, '_blank');
+  });
+});
+
+// 스크롤 맨 위로
+document.getElementById('hpGridWrap').scrollTo({ top: 0, behavior: 'smooth' });
+}
+function openNaverMapByData(placeName, address, naverUrl) {
+  const decodedName = decodeURIComponent(placeName || '');
+  const decodedAddress = decodeURIComponent(address || '');
+  const decodedUrl = decodeURIComponent(naverUrl || '');
+
+  const url = decodedUrl || `https://map.naver.com/p/search/${encodeURIComponent(decodedName + ' ' + (decodedAddress || '광주'))}`;
+  window.open(url, '_blank');
+}
 function renderHpCard(p, i, kw) {
   const emoji = Object.entries(EMOJI_MAP).find(([k]) => (p.category||'').includes(k))?.[1] || '🍽️';
   const bg = THUMB_COLORS[(p.place_id || i) % THUMB_COLORS.length];
@@ -3182,7 +3214,7 @@ function renderHpCard(p, i, kw) {
   }
 
   return `
-    <div class="hp-card${hp.viewMode==='list'?' list-view':''}">
+    <div class="hp-card${hp.viewMode==='list'?' list-view':''}" data-place-id="${p.place_id}">
       <div class="hp-card-thumb" style="background:${bg};">
         <span>${emoji}</span>
         <div class="hp-card-badges">
