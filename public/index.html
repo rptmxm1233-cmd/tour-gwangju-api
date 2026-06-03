@@ -1629,14 +1629,21 @@
     <span class="hp-filter-label">카테고리</span>
     <div class="hp-filter-scroll">
       <button class="hp-filter-btn active" onclick="setHpCategory('전체')">전체</button>
-      <button class="hp-filter-btn" onclick="setHpCategory('핫플')">✨ 핫플</button>
-      <button class="hp-filter-btn" onclick="setHpCategory('관광지')">🗺️ 관광지</button>
-      <button class="hp-filter-btn" onclick="setHpCategory('문화시설')">🏛️ 문화시설</button>
-      <button class="hp-filter-btn" onclick="setHpCategory('한식')">🍚 한식</button>
-      <button class="hp-filter-btn" onclick="setHpCategory('카페')">☕ 카페</button>
-      <button class="hp-filter-btn" onclick="setHpCategory('일식')">🍣 일식</button>
-      <button class="hp-filter-btn" onclick="setHpCategory('중식')">🥢 중식</button>
-      <button class="hp-filter-btn" onclick="setHpCategory('디저트')">🍰 디저트</button>
+<button class="hp-filter-btn" onclick="setHpCategory('관광지')">🗺️ 관광지</button>
+<button class="hp-filter-btn" onclick="setHpCategory('문화')">🏛️ 문화</button>
+<button class="hp-filter-btn" onclick="setHpCategory('공원')">🌳 공원</button>
+<button class="hp-filter-btn" onclick="setHpCategory('시장')">🛍️ 시장</button>
+<button class="hp-filter-btn" onclick="setHpCategory('공공기관')">🏢 공공기관</button>
+<button class="hp-filter-btn" onclick="setHpCategory('교육')">🎓 교육</button>
+<button class="hp-filter-btn" onclick="setHpCategory('체육')">🏟️ 체육</button>
+<button class="hp-filter-btn" onclick="setHpCategory('한식')">🍚 한식</button>
+<button class="hp-filter-btn" onclick="setHpCategory('카페')">☕ 카페</button>
+<button class="hp-filter-btn" onclick="setHpCategory('일식')">🍣 일식</button>
+<button class="hp-filter-btn" onclick="setHpCategory('중식')">🥢 중식</button>
+<button class="hp-filter-btn" onclick="setHpCategory('양식')">🍝 양식</button>
+<button class="hp-filter-btn" onclick="setHpCategory('고기')">🥩 고기</button>
+<button class="hp-filter-btn" onclick="setHpCategory('주점')">🍺 주점</button>
+<button class="hp-filter-btn" onclick="setHpCategory('기타')">📍 기타</button>
     </div>
     <div class="hp-sort-wrap">
       <button class="hp-sort-btn active" id="hpSortScore" onclick="setHpSort('score')">⭐ 점수순</button>
@@ -1741,7 +1748,7 @@
     <div class="panel-filter">
       <button class="filter-btn active" onclick="filterPlaces('전체')">전체</button>
       <button class="filter-btn" onclick="filterPlaces('관광지')">🗺️ 관광지</button>
-      <button class="filter-btn" onclick="filterPlaces('문화시설')">🏛️ 문화시설</button>
+      <button class="filter-btn" data-filter="문화">문화</button>
       <button class="filter-btn" onclick="filterPlaces('한식')">🍚 한식</button>
       <button class="filter-btn" onclick="filterPlaces('카페')">☕ 카페</button>
       <button class="filter-btn" onclick="filterPlaces('일식')">🍣 일식</button>
