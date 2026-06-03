@@ -2419,7 +2419,7 @@ async function loadPlaces() {
     </div>`;
 
   const lineName = currentLine === 1 ? '1호선' : '2호선';
-  let url = `/places?station_name=${encodeURIComponent(s.station_name)}&line_name=${encodeURIComponent(lineName)}`;
+  let url = `/api/places?station_name=${encodeURIComponent(s.station_name)}&line_name=${encodeURIComponent(lineName)}`;
   if (currentFilter !== '전체') url += `&category=${encodeURIComponent(currentFilter)}`;
 
   const data = await apiFetch(url);
