@@ -3041,8 +3041,31 @@ const data = await res.json();
       // 백엔드 미연결 시 데모 데이터 사용
      
     }
+    loadHotPlacesFromDB();
   } catch {
-    hp.allPlaces = generateDemoPlaces();
+  async function loadHotPlacesFromDB() {
+  try {
+    const res = await fetch('/api/restaurants');
+    const data = await res.json();
+
+    if (!data.success) {
+      console.error('핫플 DB 로드 실패:', data.error);
+      hp.allPlaces = [];
+      return;
+    }
+
+    hp.allPlaces = data.rows || [];
+    hp.filtered = [...hp.allPlaces];
+
+    renderHpFilters();
+    renderHpSideFilters();
+    renderHpGrid();
+
+  } catch (err) {
+    console.error('핫플 API 오류:', err);
+    hp.allPlaces = [];
+  }
+}
   }
   hp.loaded = true;
   buildDistrictSidebar();
