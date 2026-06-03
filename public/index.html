@@ -3615,17 +3615,7 @@ window.addEventListener('load', function() {
   document.body.style.overflow = 'hidden';
   if (typeof setActiveNav === 'function') setActiveNav('홈');
 });
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('stationDetailBtn');
 
-  if (btn) {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      showDetail();
-    });
-  }
-});
 </script>
 <div class="modal-bg" id="signupSuccessModal">
   <div class="signup-success-modal">
