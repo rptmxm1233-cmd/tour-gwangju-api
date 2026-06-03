@@ -1,0 +1,3394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOUR GWANGJU - 역별 탐색</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Bebas+Neue&display=swap');
+
+  :root {
+    --line1: #00B5A2;
+    --line2: #0052A4;
+    --bg: #F4F6F8;
+    --white: #FFFFFF;
+    --gray1: #F7F8FA;
+    --gray2: #EAECEF;
+    --gray3: #C4C9D4;
+    --gray4: #8A92A3;
+    --text: #1A202C;
+    --text2: #4A5568;
+    --nav-h: 60px;
+    --sidebar-w: 220px;
+    --panel-w: 380px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+
+  nav {
+    height: var(--nav-h); background: var(--white); border-bottom: 1px solid var(--gray2);
+    display: flex; align-items: center; padding: 0 24px; gap: 32px;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100; box-shadow: var(--shadow);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--line1), var(--line2));
+    border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .nav-logo .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .nav-logo .logo-text .brand { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--text); }
+  .nav-logo .logo-text .sub { font-size: 10px; color: var(--gray4); font-weight: 300; }
+  .nav-links { display: flex; gap: 4px; margin-left: 16px; }
+  .nav-links a { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; color: var(--text2); text-decoration: none; transition: all .2s; }
+  .nav-links a:hover { background: var(--gray1); color: var(--text); }
+  .nav-links a.active { background: var(--line1); color: white; }
+  .nav-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .nav-right button { padding: 6px 16px; border-radius: 20px; border: 1.5px solid var(--gray2); background: white; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; color: var(--text2); cursor: pointer; transition: all .2s; }
+  .nav-right button:hover { border-color: var(--line1); color: var(--line1); }
+  .nav-right .btn-primary { background: var(--line1); color: white; border-color: var(--line1); }
+
+  .layout { display: none; height: calc(100vh - var(--nav-h)); margin-top: var(--nav-h); }
+
+  /* 사이드바 */
+  .sidebar { width: var(--sidebar-w); background: var(--white); border-right: 1px solid var(--gray2); display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar-header { padding: 16px 16px 8px; border-bottom: 1px solid var(--gray2); }
+  .sidebar-header h3 { font-size: 12px; font-weight: 700; color: var(--gray4); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 10px; }
+  .line-tabs { display: flex; gap: 6px; }
+  .line-tab { flex: 1; padding: 6px 0; border-radius: 8px; border: 2px solid var(--gray2); background: white; font-size: 12px; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: all .2s; color: var(--gray4); }
+  .line-tab.line1.active { border-color: var(--line1); color: var(--line1); background: #e8faf8; }
+  .line-tab.line2.active { border-color: var(--line2); color: var(--line2); background: #e6eef8; }
+  .station-list { flex: 1; overflow-y: auto; padding: 12px 0 24px; }
+  .station-list::-webkit-scrollbar { width: 4px; }
+  .station-list::-webkit-scrollbar-thumb { background: var(--gray3); border-radius: 4px; }
+  .station-item { display: flex; align-items: center; gap: 10px; padding: 5px 14px; cursor: pointer; transition: background .15s; }
+  .station-item:hover { background: var(--gray1); }
+  .station-item.active { background: var(--gray1); }
+  .dot-wrap { display: flex; flex-direction: column; align-items: center; width: 20px; flex-shrink: 0; }
+  .line-seg { width: 2px; height: 10px; background: var(--line1); }
+  .line-seg.line2 { background: var(--line2); }
+  .station-dot { width: 14px; height: 14px; border-radius: 50%; background: white; border: 3px solid var(--line1); z-index: 1; transition: transform .2s; }
+  .station-dot.line2 { border-color: var(--line2); }
+  .station-dot.transfer { box-shadow: 0 0 0 3px rgba(0,181,162,.2); }
+  .station-item.active .station-dot { transform: scale(1.3); background: var(--line1); }
+  .station-item.active .station-dot.line2 { background: var(--line2); }
+  .station-info { flex: 1; min-width: 0; }
+  .station-name-label { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .station-item.active .station-name-label { font-weight: 700; color: var(--line1); }
+  .station-item.active.line2 .station-name-label { color: var(--line2); }
+  .transfer-badge { font-size: 9px; background: #fff3e0; color: #e65100; border-radius: 4px; padding: 1px 4px; font-weight: 700; margin-left: 2px; }
+  .district-label { font-size: 10px; color: var(--gray4); }
+  .sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--gray2); }
+  .sidebar-footer button { width: 100%; padding: 9px; border-radius: 8px; border: 1.5px solid var(--gray2); background: white; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; color: var(--text2); cursor: pointer; transition: all .2s; }
+  .sidebar-footer button:hover { border-color: var(--line1); color: var(--line1); }
+
+  /* 지도 */
+  .map-area { flex: 1; position: relative; overflow: hidden; }
+  .map-header { position: absolute; top: 0; left: 0; right: 0; padding: 16px 20px; z-index: 20; display: flex; align-items: flex-start; justify-content: space-between; }
+  .map-station-info { background: white; border-radius: var(--radius); padding: 12px 16px; box-shadow: var(--shadow-lg); min-width: 220px; }
+  .map-station-info .loc-icon { font-size: 11px; color: var(--line1); font-weight: 700; margin-bottom: 2px; }
+  .map-station-info h2 { font-size: 18px; font-weight: 900; color: var(--text); line-height: 1.2; }
+  .map-station-info .sub-desc { font-size: 11px; color: var(--gray4); margin-top: 2px; }
+  .map-detail-btn { background: white; border: none; border-radius: var(--radius); padding: 12px 16px; box-shadow: var(--shadow-lg); font-size: 12px; font-family: 'Noto Sans KR', sans-serif; font-weight: 600; color: var(--line1); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .2s; }
+  .map-detail-btn:hover { background: var(--line1); color: white; }
+  .map-legend { position: absolute; bottom: 16px; left: 16px; background: white; border-radius: 10px; padding: 10px 14px; box-shadow: var(--shadow); display: flex; gap: 14px; font-size: 11px; z-index: 20; }
+  .legend-item { display: flex; align-items: center; gap: 5px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* 패널 */
+  .panel { width: var(--panel-w); background: var(--white); border-left: 1px solid var(--gray2); display: flex; flex-direction: column; overflow: hidden; }
+  .panel-filter { padding: 10px 16px; border-bottom: 1px solid var(--gray2); display: flex; gap: 5px; flex-wrap: wrap; }
+  .filter-btn { padding: 4px 10px; border-radius: 20px; border: 1.5px solid var(--gray2); background: white; font-size: 11px; font-weight: 500; font-family: 'Noto Sans KR', sans-serif; color: var(--text2); cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .filter-btn:hover { border-color: var(--gray3); }
+  .filter-btn.active { border-color: var(--line1); background: var(--line1); color: white; }
+  .panel-result-header { padding: 14px 16px 10px; display: flex; align-items: center; justify-content: space-between; }
+  .panel-result-header h4 { font-size: 14px; font-weight: 700; color: var(--text); }
+  .sort-btn { font-size: 12px; color: var(--gray4); background: none; border: none; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+  .place-list { flex: 1; overflow-y: auto; padding: 0 16px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .place-list::-webkit-scrollbar { width: 4px; }
+  .place-list::-webkit-scrollbar-thumb { background: var(--gray3); border-radius: 4px; }
+
+  /* 장소 카드 */
+  .place-card { display: flex; gap: 12px; padding: 12px; border-radius: var(--radius); border: 1.5px solid var(--gray2); cursor: pointer; transition: all .2s; background: white; position: relative; }
+  .place-card:hover { border-color: var(--line1); box-shadow: 0 4px 16px rgba(0,181,162,.1); }
+  .place-rank { position: absolute; top: 10px; left: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--line1); color: white; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .place-img { width: 80px; height: 80px; border-radius: 10px; flex-shrink: 0; background: var(--gray2); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .place-body { flex: 1; min-width: 0; }
+  .place-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .place-stars { display: flex; align-items: center; gap: 3px; font-size: 11px; margin-bottom: 4px; }
+  .cat-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-bottom: 5px; }
+  .cat-badge.한식 { background: #fff0f0; color: #c0392b; }
+  .cat-badge.카페 { background: #fff8e1; color: #e65100; }
+  .cat-badge.중식 { background: #f3e5f5; color: #7b1fa2; }
+  .cat-badge.일식 { background: #e3f2fd; color: #1565c0; }
+  .cat-badge.디저트 { background: #fce4ec; color: #c2185b; }
+  .cat-badge.관광지 { background: #e8f5e9; color: #2e7d32; }
+  .cat-badge.문화시설 { background: #e0f7fa; color: #00838f; }
+  .cat-badge.핫플 { background: #fff3e0; color: #e65100; }
+  .place-desc { font-size: 11px; color: var(--text2); margin-bottom: 5px; }
+  .place-meta { font-size: 10px; color: var(--gray4); display: flex; align-items: center; gap: 4px; }
+  .place-fav { position: absolute; bottom: 10px; right: 10px; background: none; border: none; font-size: 16px; cursor: pointer; transition: transform .2s; }
+  .place-fav:hover { transform: scale(1.3); }
+
+  /* 역 정보 카드 */
+  .station-detail-card { margin: 14px 16px 0; background: linear-gradient(135deg, var(--line1) 0%, #00978a 100%); border-radius: var(--radius); padding: 16px; color: white; position: relative; overflow: hidden; }
+  .station-detail-card.line2 { background: linear-gradient(135deg, var(--line2) 0%, #003a7a 100%); }
+  .station-detail-card::after { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,.08); }
+  .station-detail-card .line-badge { display: inline-block; background: rgba(255,255,255,.2); border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+  .station-detail-card h3 { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
+  .station-detail-card .detail-row { font-size: 11px; opacity: .85; display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* 빈 상태 */
+  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--gray4); padding: 40px; text-align: center; }
+  .empty-state .emoji { font-size: 48px; }
+  .empty-state p { font-size: 13px; line-height: 1.6; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .place-card { animation: fadeIn .25s ease both; }
+  .place-card:nth-child(1) { animation-delay: .0s; }
+  .place-card:nth-child(2) { animation-delay: .05s; }
+  .place-card:nth-child(3) { animation-delay: .1s; }
+  .place-card:nth-child(4) { animation-delay: .15s; }
+  .place-card:nth-child(5) { animation-delay: .2s; }
+  /* 로그인 팝업 */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-bg.show {
+  display: flex;
+}
+
+.auth-modal {
+  width: 360px;
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  animation: pop .2s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.auth-modal h2 {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.auth-modal p {
+  font-size: 13px;
+  color: var(--gray4);
+  margin-bottom: 18px;
+}
+
+.auth-modal input {
+  width: 100%;
+  padding: 12px;
+  border: 1.5px solid var(--gray2);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-family: 'Noto Sans KR';
+}
+
+.auth-modal input:focus {
+  outline: none;
+  border-color: var(--line1);
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--line1);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.auth-switch {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray4);
+}
+
+.auth-switch span {
+  color: var(--line1);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.close-modal {
+  float: right;
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+.mypage-modal {
+  width: 460px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  animation: pop .2s ease;
+}
+
+.mypage-section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray2);
+}
+
+.mypage-section h3 {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.mypage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mypage-item {
+  padding: 10px;
+  border: 1px solid var(--gray2);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.mypage-input {
+  width: 100%;
+  padding: 10px;
+  border: 1.5px solid var(--gray2);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.mypage-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: var(--line1);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger-btn {
+  background: #e74c3c;
+  margin-top: 10px;
+}
+.review-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 48px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all .2s ease;
+  box-shadow: 0 3px 10px rgba(102,126,234,.3);
+}
+
+.review-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(102,126,234,.4);
+}
+.welcome-modal {
+  width: 420px;
+  background: white;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.28);
+  text-align: center;
+  animation: pop .22s ease;
+}
+
+.welcome-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 14px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--line1), var(--line2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+}
+
+.welcome-modal h2 {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.welcome-modal p {
+  font-size: 13px;
+  color: var(--gray4);
+  margin-bottom: 22px;
+}
+
+.welcome-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.welcome-card {
+  border: 1.5px solid var(--gray2);
+  border-radius: 18px;
+  padding: 18px 12px;
+  cursor: pointer;
+  background: var(--gray1);
+  transition: all .2s ease;
+}
+
+.welcome-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--line1);
+  box-shadow: 0 8px 24px rgba(0,181,162,.18);
+}
+
+.welcome-card .big {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.welcome-card b {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.welcome-card span {
+  font-size: 11px;
+  color: var(--gray4);
+}
+.login-error {
+  margin: 10px 0 4px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: #fff5f5;
+  border: 1.5px solid #ffb3b3;
+  color: #e74c3c;
+  font-size: 12px;
+  font-weight: 700;
+  display: none;
+}
+
+.shake {
+  animation: shake .35s ease;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-8px); }
+  100% { transform: translateX(0); }
+}
+
+/* ===== tour_gwangju_1.html에서 통합한 홈/추천코스/핫플 CSS ===== */
+  /* ══════════════════════════════════════
+     홈 모달
+  ══════════════════════════════════════ */
+  .home-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(10, 20, 40, 0.72);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s ease;
+  }
+  .home-overlay.open { opacity: 1; pointer-events: all; }
+
+  .home-modal {
+    width: 860px; max-width: 96vw;
+    max-height: 90vh;
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    display: flex; flex-direction: column;
+    transform: translateY(28px) scale(.97);
+    transition: transform .38s cubic-bezier(.22,1,.36,1);
+  }
+  .home-overlay.open .home-modal { transform: translateY(0) scale(1); }
+
+  /* 히어로 배너 */
+  .home-hero {
+    position: relative; height: 220px; flex-shrink: 0;
+    background: linear-gradient(135deg, #002d52 0%, #004f8c 40%, #00736e 100%);
+    overflow: hidden;
+  }
+  .home-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(0,181,162,.35) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 70% at 20% 80%, rgba(0,82,164,.4) 0%, transparent 60%);
+  }
+  /* 장식 원들 */
+  .home-hero::after {
+    content: '';
+    position: absolute; right: -60px; top: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    border: 40px solid rgba(255,255,255,.05);
+  }
+  .hero-circle2 {
+    position: absolute; left: -40px; bottom: -80px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    border: 30px solid rgba(0,181,162,.12);
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    padding: 36px 40px; color: white;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    height: 100%;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 11px; font-weight: 600; letter-spacing: .5px;
+    margin-bottom: 12px; color: rgba(255,255,255,.9);
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; letter-spacing: 2px; line-height: 1;
+    margin-bottom: 8px;
+  }
+  .hero-title span { color: #4de8da; }
+  .hero-subtitle { font-size: 14px; opacity: .8; font-weight: 300; line-height: 1.6; }
+  .hero-right { text-align: right; }
+  .hero-stats { display: flex; gap: 20px; }
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #4de8da; line-height: 1; }
+  .hero-stat .lbl { font-size: 10px; opacity: .7; font-weight: 300; margin-top: 2px; }
+  .hero-close {
+    position: absolute; top: 16px; right: 16px; z-index: 10;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+    color: white; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .hero-close:hover { background: rgba(255,255,255,.3); }
+
+  /* 본문 */
+  .home-body { padding: 28px 32px 32px; overflow-y: auto; }
+
+  /* 소개 텍스트 */
+  .intro-text {
+    font-size: 14px; line-height: 1.85; color: var(--text2);
+    border-left: 3px solid var(--line1);
+    padding-left: 16px; margin-bottom: 28px;
+  }
+  .intro-text strong { color: var(--text); }
+
+  /* 특징 카드 그리드 */
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+  .feature-card {
+    border-radius: 14px; padding: 18px 16px;
+    border: 1.5px solid var(--gray2);
+    transition: border-color .2s, box-shadow .2s;
+    cursor: default;
+  }
+  .feature-card:hover { border-color: var(--line1); box-shadow: 0 4px 16px rgba(0,181,162,.1); }
+  .feature-card .fc-icon { font-size: 26px; margin-bottom: 10px; }
+  .feature-card .fc-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+  .feature-card .fc-desc { font-size: 12px; color: var(--text2); line-height: 1.6; }
+
+  /* 노선 소개 배너 */
+  .line-intro { display: flex; gap: 14px; margin-bottom: 28px; }
+  .line-card {
+    flex: 1; border-radius: 14px; padding: 18px 20px; color: white;
+    position: relative; overflow: hidden;
+  }
+  .line-card.lc1 { background: linear-gradient(130deg, #009d8e 0%, #00B5A2 100%); }
+  .line-card.lc2 { background: linear-gradient(130deg, #003d7a 0%, #0052A4 100%); }
+  .line-card::after {
+    content: ''; position: absolute; right: -20px; top: -20px;
+    width: 90px; height: 90px; border-radius: 50%;
+    background: rgba(255,255,255,.08);
+  }
+  .line-card .lc-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; opacity: .25; line-height: 1; }
+  .line-card .lc-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .line-card .lc-info { font-size: 11px; opacity: .8; line-height: 1.6; }
+  .line-card .lc-badge {
+    display: inline-block; background: rgba(255,255,255,.2);
+    border-radius: 4px; padding: 2px 8px; font-size: 10px;
+    font-weight: 700; margin-top: 8px;
+  }
+
+  /* 이용 팁 */
+  .tips-section { background: var(--gray1); border-radius: 14px; padding: 18px 20px; }
+  .tips-section h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .tips-list { display: flex; flex-direction: column; gap: 8px; }
+  .tip-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .tip-num { width: 20px; height: 20px; border-radius: 50%; background: var(--line1); color: white; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+  /* 하단 CTA */
+  .home-footer {
+    padding: 16px 32px; border-top: 1px solid var(--gray2);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .home-footer .footer-note { font-size: 12px; color: var(--gray4); }
+  .home-footer .cta-btn {
+    padding: 10px 28px; border-radius: 24px;
+    background: linear-gradient(130deg, var(--line1), #0052A4);
+    color: white; border: none; font-size: 14px; font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700; cursor: pointer; transition: opacity .2s, transform .2s;
+    letter-spacing: .3px;
+  }
+  .home-footer .cta-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .home-body .intro-text,
+  .home-body .feature-grid,
+  .home-body .line-intro,
+  .home-body .tips-section {
+    animation: modalIn .4s ease both;
+  }
+  .home-body .feature-grid { animation-delay: .05s; }
+  .home-body .line-intro   { animation-delay: .1s; }
+  .home-body .tips-section { animation-delay: .15s; }
+
+   /* ══════════════════════════════════════
+     추천 여행 코스 모달
+  ══════════════════════════════════════ */
+  .course-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s ease;
+  }
+  .course-overlay.open { opacity: 1; pointer-events: all; }
+
+  .course-modal {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* 헤더 */
+  .course-modal-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray2);
+    padding: 0 28px;
+    height: 64px;
+    display: flex; align-items: center; gap: 16px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+    position: relative; z-index: 10;
+  }
+  .course-back {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid var(--gray2); background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; transition: all .2s; flex-shrink: 0;
+    color: var(--text2);
+  }
+  .course-back:hover { border-color: var(--line1); color: var(--line1); background: #e8faf8; }
+  .course-modal-header .ch-title-wrap { display: flex; flex-direction: column; line-height: 1.2; }
+  .course-modal-header .ch-title-wrap .ch-main { font-size: 17px; font-weight: 900; color: var(--text); }
+  .course-modal-header .ch-title-wrap .ch-sub { font-size: 11px; color: var(--gray4); font-weight: 400; }
+  .course-modal-header .ch-stats { margin-left: auto; display: flex; gap: 20px; }
+  .course-modal-header .ch-stat { text-align: center; }
+  .course-modal-header .ch-stat .n {
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    color: var(--line1); line-height: 1;
+  }
+  .course-modal-header .ch-stat .l { font-size: 10px; color: var(--gray4); font-weight: 400; margin-top: 1px; }
+
+  /* 탭 */
+  .course-tab-bar {
+    display: flex; gap: 0; border-bottom: 2px solid var(--gray2);
+    padding: 0 28px; background: white; flex-shrink: 0;
+    box-shadow: var(--shadow);
+  }
+  .course-tab {
+    padding: 14px 20px; font-size: 13px; font-weight: 600;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--gray4); border: none; background: none; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: all .2s; display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .course-tab:hover { color: var(--text); }
+  .course-tab.active { color: var(--line1); border-bottom-color: var(--line1); }
+  .course-tab .tab-num {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--gray2); color: var(--gray4);
+    font-size: 9px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .course-tab.active .tab-num { background: var(--line1); color: white; }
+
+  /* 코스 본문 — 전체화면 기준 */
+  .course-body {
+    flex: 1; overflow-y: auto;
+    padding: 28px 0 40px;
+  }
+  .course-body::-webkit-scrollbar { width: 5px; }
+  .course-body::-webkit-scrollbar-thumb { background: var(--gray3); border-radius: 4px; }
+
+  /* 내용 최대 너비 중앙 정렬 */
+  .course-inner {
+    max-width: 860px; margin: 0 auto; padding: 0 32px;
+  }
+
+  /* 코스 패널 */
+  .course-panel { display: none; animation: courseIn .3s ease both; }
+  .course-panel.active { display: block; }
+  @keyframes courseIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 코스 요약 카드 */
+  .course-summary {
+    border-radius: 16px; padding: 20px 24px;
+    margin-bottom: 28px; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  }
+  .course-summary::after {
+    content: ''; position: absolute; right: -30px; top: -30px;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: rgba(255,255,255,.08);
+  }
+  .cs-left { position: relative; z-index: 1; }
+  .cs-course-num { font-size: 11px; font-weight: 700; opacity: .75; margin-bottom: 4px; letter-spacing: .5px; }
+  .cs-title { font-size: 20px; font-weight: 900; color: white; margin-bottom: 6px; }
+  .cs-desc { font-size: 12px; color: rgba(255,255,255,.8); line-height: 1.6; }
+  .cs-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .cs-tag {
+    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px; padding: 3px 10px; font-size: 10px;
+    font-weight: 600; color: rgba(255,255,255,.9);
+  }
+  .cs-right { position: relative; z-index: 1; text-align: right; flex-shrink: 0; }
+  .cs-meta { font-size: 11px; color: rgba(255,255,255,.7); line-height: 1.8; }
+
+  /* 스텝 타임라인 */
+  .course-timeline { display: flex; flex-direction: column; gap: 0; }
+
+  .timeline-step {
+    display: flex; gap: 0; position: relative;
+  }
+
+  /* 좌측 타임라인 레일 */
+  .tl-rail {
+    display: flex; flex-direction: column; align-items: center;
+    width: 52px; flex-shrink: 0; padding-top: 4px;
+  }
+  .tl-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0; z-index: 1;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  .tl-line {
+    width: 2px; flex: 1; min-height: 20px;
+    margin: 4px 0;
+  }
+
+  /* 우측 콘텐츠 */
+  .tl-content {
+    flex: 1; padding: 0 0 28px 16px;
+  }
+
+  /* 역 배지 (스텝 위) */
+  .tl-station-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 11px; font-weight: 700;
+    margin-bottom: 10px;
+    border: 1.5px solid;
+  }
+
+  /* 장소 카드 */
+  .tl-place-card {
+    background: white; border: 1.5px solid var(--gray2);
+    border-radius: 14px; padding: 16px 18px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .tl-place-card:hover { border-color: var(--line1); box-shadow: 0 4px 16px rgba(0,181,162,.1); }
+
+  .tl-time-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    border-radius: 6px; padding: 3px 9px;
+    font-size: 10px; font-weight: 800; margin-bottom: 8px;
+  }
+  .tl-time-badge.morning  { background: #fff8e1; color: #e65100; }
+  .tl-time-badge.lunch    { background: #e8f5e9; color: #2e7d32; }
+  .tl-time-badge.evening  { background: #e8eaf6; color: #283593; }
+
+  .tl-place-name { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 5px; }
+  .tl-place-desc { font-size: 12px; color: var(--text2); line-height: 1.65; margin-bottom: 10px; }
+  .tl-place-meta {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .tl-meta-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--gray1); border-radius: 6px;
+    padding: 3px 8px; font-size: 10px; color: var(--text2); font-weight: 500;
+  }
+
+  /* 이동 표시 */
+  .tl-transfer {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 0 8px 16px; font-size: 11px; color: var(--gray4);
+  }
+  .tl-transfer-arrow {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--gray1); border-radius: 20px; padding: 4px 10px;
+    font-size: 11px; font-weight: 600; color: var(--text2);
+  }
+
+  /* 코스 푸터 */
+  .course-footer {
+    padding: 14px 28px; border-top: 1px solid var(--gray2);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .course-footer .cf-note { font-size: 12px; color: var(--gray4); }
+  .course-footer .cf-btns { display: flex; gap: 8px; }
+  .cf-btn {
+    padding: 8px 20px; border-radius: 20px; border: 1.5px solid var(--gray2);
+    background: white; font-size: 13px; font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 600; color: var(--text2); cursor: pointer; transition: all .2s;
+  }
+  .cf-btn:hover { border-color: var(--line1); color: var(--line1); }
+  .cf-btn.primary {
+    background: linear-gradient(130deg, var(--line1), #0052A4);
+    color: white; border-color: transparent;
+  }
+  .cf-btn.primary:hover { opacity: .88; transform: translateY(-1px); }
+
+  /* ══════════════════════════════════════
+     핫플 & 맛집 전체화면 모달
+  ══════════════════════════════════════ */
+  .hotplace-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s ease;
+  }
+  .hotplace-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* 상단 헤더 */
+  .hp-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray2);
+    padding: 0 28px;
+    height: 64px;
+    display: flex; align-items: center; gap: 20px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+    position: relative; z-index: 10;
+  }
+  .hp-back {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid var(--gray2); background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; transition: all .2s; flex-shrink: 0;
+    color: var(--text2);
+  }
+  .hp-back:hover { border-color: var(--line1); color: var(--line1); background: #e8faf8; }
+  .hp-title-wrap { display: flex; flex-direction: column; line-height: 1.2; }
+  .hp-title-wrap .hp-main-title { font-size: 17px; font-weight: 900; color: var(--text); }
+  .hp-title-wrap .hp-sub { font-size: 11px; color: var(--gray4); font-weight: 400; }
+
+  /* 검색바 */
+  .hp-search-wrap {
+    flex: 1; max-width: 480px; position: relative;
+  }
+  .hp-search-wrap .search-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    font-size: 15px; pointer-events: none; color: var(--gray4);
+  }
+  .hp-search-input {
+    width: 100%; height: 40px;
+    border: 1.5px solid var(--gray2); border-radius: 20px;
+    padding: 0 42px 0 40px;
+    font-size: 13px; font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text); background: var(--gray1);
+    outline: none; transition: all .2s;
+  }
+  .hp-search-input:focus { border-color: var(--line1); background: white; box-shadow: 0 0 0 3px rgba(0,181,162,.12); }
+  .hp-search-input::placeholder { color: var(--gray4); }
+  .hp-search-clear {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    width: 20px; height: 20px; border-radius: 50%; background: var(--gray3);
+    border: none; color: white; font-size: 10px; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .hp-search-clear.visible { display: flex; }
+  .hp-search-clear:hover { background: var(--gray4); }
+
+  .hp-header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .hp-count-badge {
+    background: var(--gray1); border: 1px solid var(--gray2);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 12px; color: var(--text2); font-weight: 500; white-space: nowrap;
+  }
+  .hp-count-badge span { font-weight: 700; color: var(--line1); }
+
+  /* 툴바 (필터 + 정렬) */
+  .hp-toolbar {
+    background: var(--white); border-bottom: 1px solid var(--gray2);
+    padding: 10px 28px; display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0; flex-wrap: wrap;
+  }
+  .hp-filter-label { font-size: 11px; font-weight: 700; color: var(--gray4); letter-spacing: .3px; white-space: nowrap; }
+  .hp-filter-scroll { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .hp-filter-btn {
+    padding: 5px 12px; border-radius: 20px;
+    border: 1.5px solid var(--gray2); background: white;
+    font-size: 12px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text2); cursor: pointer; transition: all .2s; white-space: nowrap;
+  }
+  .hp-filter-btn:hover { border-color: var(--gray3); }
+  .hp-filter-btn.active { border-color: var(--line1); background: var(--line1); color: white; }
+  .hp-sort-wrap { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
+  .hp-sort-btn {
+    padding: 5px 12px; border-radius: 8px;
+    border: 1.5px solid var(--gray2); background: white;
+    font-size: 11px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text2); cursor: pointer; transition: all .2s; white-space: nowrap;
+  }
+  .hp-sort-btn.active { border-color: var(--line2); background: var(--line2); color: white; }
+  .hp-sort-btn:hover:not(.active) { border-color: var(--gray3); }
+
+  /* 검색 키워드 태그 */
+  .hp-keyword-row {
+    background: var(--white); border-bottom: 1px solid var(--gray2);
+    padding: 8px 28px; display: none; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .hp-keyword-row.visible { display: flex; }
+  .hp-keyword-label { font-size: 11px; color: var(--gray4); font-weight: 600; }
+  .hp-keyword-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #e8faf8; border: 1px solid var(--line1);
+    color: var(--line1); border-radius: 20px; padding: 3px 10px;
+    font-size: 12px; font-weight: 700;
+  }
+  .hp-keyword-tag button { background: none; border: none; cursor: pointer; color: var(--line1); font-size: 12px; padding: 0; line-height: 1; }
+
+  /* 메인 콘텐츠 영역 */
+  .hp-body { flex: 1; display: flex; overflow: hidden; }
+
+  /* 왼쪽: 필터 사이드바 (구 / 역) */
+  .hp-sidebar {
+    width: 200px; flex-shrink: 0;
+    background: var(--white); border-right: 1px solid var(--gray2);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .hp-side-section { padding: 14px 16px 8px; border-bottom: 1px solid var(--gray2); }
+  .hp-side-section h4 { font-size: 11px; font-weight: 700; color: var(--gray4); letter-spacing: .4px; margin-bottom: 8px; }
+  .hp-side-list { overflow-y: auto; flex: 1; padding: 8px 0 16px; }
+  .hp-side-list::-webkit-scrollbar { width: 3px; }
+  .hp-side-list::-webkit-scrollbar-thumb { background: var(--gray3); border-radius: 4px; }
+  .hp-side-item {
+    padding: 6px 16px; font-size: 12px; font-weight: 500; color: var(--text2);
+    cursor: pointer; transition: background .15s; display: flex; align-items: center; justify-content: space-between;
+  }
+  .hp-side-item:hover { background: var(--gray1); }
+  .hp-side-item.active { background: #e8faf8; color: var(--line1); font-weight: 700; }
+  .hp-side-item .side-count { font-size: 10px; color: var(--gray4); background: var(--gray2); border-radius: 10px; padding: 1px 6px; }
+  .hp-side-item.active .side-count { background: rgba(0,181,162,.15); color: var(--line1); }
+
+  /* 오른쪽: 카드 그리드 */
+  .hp-grid-wrap { flex: 1; overflow-y: auto; padding: 20px 24px 32px; }
+  .hp-grid-wrap::-webkit-scrollbar { width: 6px; }
+  .hp-grid-wrap::-webkit-scrollbar-thumb { background: var(--gray3); border-radius: 4px; }
+
+  /* 정렬/결과 헤더 */
+  .hp-result-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .hp-result-bar .result-text { font-size: 13px; font-weight: 700; color: var(--text); }
+  .hp-result-bar .result-text span { color: var(--line1); }
+  .hp-result-bar .view-toggle { display: flex; gap: 4px; }
+  .view-btn {
+    width: 30px; height: 30px; border-radius: 6px;
+    border: 1.5px solid var(--gray2); background: white;
+    font-size: 13px; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; color: var(--gray4);
+  }
+  .view-btn.active { border-color: var(--line1); color: var(--line1); background: #e8faf8; }
+
+  /* 카드 그리드 */
+  .hp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .hp-grid.list-view { grid-template-columns: 1fr; }
+
+  /* 핫플 카드 */
+  .hp-card {
+    background: white; border-radius: 14px; border: 1.5px solid var(--gray2);
+    overflow: hidden; cursor: pointer; transition: all .25s;
+    position: relative;
+    animation: hpCardIn .3s ease both;
+  }
+  @keyframes hpCardIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hp-card:hover { border-color: var(--line1); box-shadow: 0 6px 24px rgba(0,181,162,.13); transform: translateY(-2px); }
+  .hp-card-thumb {
+    height: 120px; background: linear-gradient(135deg, var(--gray1), var(--gray2));
+    display: flex; align-items: center; justify-content: center; font-size: 42px;
+    position: relative; overflow: hidden;
+  }
+  .hp-card-thumb::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,.06));
+  }
+  .hp-card.list-view .hp-card-thumb { height: 90px; width: 90px; flex-shrink: 0; border-radius: 0; }
+  .hp-card.list-view { display: flex; }
+  .hp-card.list-view .hp-card-body { flex: 1; }
+
+  .hp-card-badges {
+    position: absolute; top: 10px; left: 10px; display: flex; gap: 4px; z-index: 2;
+  }
+  .hp-card-badge {
+    padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700;
+    backdrop-filter: blur(4px);
+  }
+  .hp-card-badge.cat { background: rgba(255,255,255,.9); color: var(--text); }
+  .hp-card-badge.rank { background: var(--line1); color: white; }
+  .hp-card-badge.score { background: #f0a500; color: white; }
+
+  .hp-card-fav {
+    position: absolute; top: 10px; right: 10px; z-index: 2;
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,.9); font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .2s, background .2s;
+  }
+  .hp-card-fav:hover { transform: scale(1.2); background: white; }
+
+  .hp-card-body { padding: 12px 14px 14px; }
+  .hp-card-cat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .hp-card-cat-pill {
+    padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;
+  }
+  .hp-card-cat-pill.한식  { background: #fff0f0; color: #c0392b; }
+  .hp-card-cat-pill.카페  { background: #fff8e1; color: #e65100; }
+  .hp-card-cat-pill.중식  { background: #f3e5f5; color: #7b1fa2; }
+  .hp-card-cat-pill.일식  { background: #e3f2fd; color: #1565c0; }
+  .hp-card-cat-pill.디저트 { background: #fce4ec; color: #c2185b; }
+  .hp-card-cat-pill.관광지 { background: #e8f5e9; color: #2e7d32; }
+  .hp-card-cat-pill.문화시설 { background: #e0f7fa; color: #00838f; }
+  .hp-card-cat-pill.핫플  { background: #fff3e0; color: #e65100; }
+  .hp-card-name { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hp-card-stars { display: flex; align-items: center; gap: 2px; font-size: 11px; color: #f0a500; margin-bottom: 6px; }
+  .hp-card-stars .score-text { font-size: 10px; color: var(--gray4); margin-left: 3px; }
+  .hp-card-addr { font-size: 11px; color: var(--text2); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hp-card-station { font-size: 10px; color: var(--gray4); display: flex; align-items: center; gap: 3px; }
+  .hp-card-phone { font-size: 10px; color: var(--gray4); }
+
+  /* 검색 하이라이트 */
+  .hl { background: #fff176; color: var(--text); border-radius: 2px; padding: 0 1px; }
+
+  /* 빈 상태 */
+  .hp-empty {
+    grid-column: 1/-1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    padding: 80px 20px; text-align: center; color: var(--gray4);
+  }
+  .hp-empty .hp-empty-emoji { font-size: 52px; }
+  .hp-empty p { font-size: 14px; line-height: 1.7; }
+  .hp-empty button {
+    margin-top: 4px; padding: 8px 20px; border-radius: 20px;
+    border: 1.5px solid var(--line1); background: white;
+    color: var(--line1); font-size: 13px; font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 600; cursor: pointer; transition: all .2s;
+  }
+  .hp-empty button:hover { background: var(--line1); color: white; }
+
+  /* 로딩 스켈레톤 */
+  .hp-skeleton {
+    background: white; border-radius: 14px; border: 1.5px solid var(--gray2); overflow: hidden;
+  }
+  .skel-thumb { height: 120px; background: linear-gradient(90deg, var(--gray1) 25%, var(--gray2) 50%, var(--gray1) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+  .skel-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .skel-line { height: 10px; border-radius: 5px; background: linear-gradient(90deg, var(--gray1) 25%, var(--gray2) 50%, var(--gray1) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+  .skel-line.w60 { width: 60%; }
+  .skel-line.w80 { width: 80%; }
+  .skel-line.w40 { width: 40%; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* 페이지네이션 */
+  .hp-pagination {
+    display: flex; justify-content: center; align-items: center; gap: 8px;
+    margin-top: 28px; padding-bottom: 8px;
+  }
+  .hp-page-btn {
+    width: 34px; height: 34px; border-radius: 8px;
+    border: 1.5px solid var(--gray2); background: white;
+    font-size: 13px; font-family: 'Noto Sans KR', sans-serif; font-weight: 600;
+    color: var(--text2); cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hp-page-btn:hover { border-color: var(--line1); color: var(--line1); }
+  .hp-page-btn.active { background: var(--line1); border-color: var(--line1); color: white; }
+  .hp-page-btn:disabled { opacity: .4; cursor: default; pointer-events: none; }
+
+</style>
+
+</head>
+<body>
+
+<!-- ===== tour_gwangju_1.html에서 통합한 홈/추천코스/핫플 화면 ===== -->
+<div class="home-overlay open" id="homeOverlay">
+  <div class="home-modal">
+
+    <!-- 히어로 -->
+    <div class="home-hero">
+      <div class="hero-circle2"></div>
+      <button class="hero-close" onclick="showStationExplore()">✕</button>
+      <div class="hero-content">
+        <div class="hero-left">
+          <div class="hero-eyebrow">🚇 광주 도시철도 여행 가이드</div>
+          <div class="hero-title">TOUR <span>GWANGJU</span></div>
+          <div class="hero-subtitle">지하철 한 장으로 만나는 광주의 모든 것<br>맛집 · 관광 · 문화시설을 한눈에</div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="num">56</div>
+              <div class="lbl">전체 역</div>
+            </div>
+            <div class="hero-stat">
+              <div class="num">2</div>
+              <div class="lbl">운행 노선</div>
+            </div>
+            <div class="hero-stat">
+              <div class="num">500+</div>
+              <div class="lbl">등록 장소</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 본문 -->
+    <div class="home-body">
+
+      <p class="intro-text">
+        <strong>TOUR GWANGJU</strong>는 광주 도시철도 1·2호선을 기반으로 각 역 주변의
+        <strong>맛집, 카페, 관광명소, 문화시설</strong>을 손쉽게 탐색할 수 있는 여행 플랫폼입니다.<br>
+        역 하나를 클릭하는 것만으로 도보 5분 이내의 알찬 여행 정보를 즉시 확인해 보세요.
+      </p>
+
+      <!-- 주요 기능 -->
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="fc-icon">🗺️</div>
+          <div class="fc-title">역별 탐색</div>
+          <div class="fc-desc">1·2호선 전 역을 노선도에서 선택하면 주변 관광·맛집 정보를 카드 형태로 바로 확인할 수 있어요.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">🍽️</div>
+          <div class="fc-title">카테고리 필터</div>
+          <div class="fc-desc">한식, 카페, 일식, 관광지 등 원하는 카테고리로 빠르게 좁혀 취향에 딱 맞는 장소를 찾아보세요.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">📍</div>
+          <div class="fc-title">카카오맵 연동</div>
+          <div class="fc-desc">실시간 지도에서 역 위치를 확인하고, 마커를 클릭해 바로 그 역의 정보를 불러올 수 있어요.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">❤️</div>
+          <div class="fc-title">즐겨찾기</div>
+          <div class="fc-desc">마음에 드는 장소는 하트 버튼으로 즐겨찾기에 추가해 나만의 여행 리스트를 만들어보세요.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">🔄</div>
+          <div class="fc-title">환승 정보</div>
+          <div class="fc-desc">1·2호선 환승역을 별도 표시하여 동선 계획을 더욱 편리하게 세울 수 있도록 도와드려요.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">⭐</div>
+          <div class="fc-title">데이트 점수</div>
+          <div class="fc-desc">각 장소의 데이트 활용도를 5점 척도로 안내해 드려요. 특별한 날 방문할 곳을 골라보세요.</div>
+        </div>
+      </div>
+
+      <!-- 노선 소개 -->
+      <div class="line-intro">
+        <div class="line-card lc1">
+          <div class="lc-num">1</div>
+          <div class="lc-name">🟢 1호선 — 녹동 ↔ 평동</div>
+          <div class="lc-info">광주 동서를 가로지르는 간선 노선.<br>문화전당, 양동시장, 상무, 광주송정역 등<br>광주의 핵심 명소를 연결합니다.</div>
+          <div class="lc-badge">20개 역 · 2004년 개통</div>
+        </div>
+        <div class="line-card lc2">
+          <div class="lc-num">2</div>
+          <div class="lc-name">🔵 2호선 — 순환선 (공사 중)</div>
+          <div class="lc-info">광주를 크게 한 바퀴 도는 순환형 노선.<br>조선대, 전남대, 첨단지구, 수완지구 등<br>주요 대학·신도시를 촘촘히 잇습니다.</div>
+          <div class="lc-badge">38개 역 · 2026·2029년 개통 예정</div>
+        </div>
+      </div>
+
+      <!-- 이용 팁 -->
+      <div class="tips-section">
+        <h4>💡 이용 팁</h4>
+        <div class="tips-list">
+          <div class="tip-item">
+            <div class="tip-num">1</div>
+            <span>왼쪽 노선도에서 <strong>역 이름</strong>을 클릭하거나, 지도의 <strong>마커</strong>를 클릭하면 해당 역 정보가 바로 열려요.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-num">2</div>
+            <span>오른쪽 패널 상단의 <strong>카테고리 버튼</strong>으로 관광지·맛집·카페 등을 필터링할 수 있어요.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-num">3</div>
+            <span>장소 카드의 🤍 버튼으로 <strong>즐겨찾기</strong>를 추가하면, 상단 '즐겨찾기' 메뉴에서 모아볼 수 있어요.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-num">4</div>
+            <span>2호선은 일부 구간이 개통 예정이에요. 미개통 역은 미리 둘러보고 여행 계획을 세워두세요!</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /home-body -->
+
+    <!-- 하단 CTA -->
+    <div class="home-footer">
+      <span class="footer-note">🚇 광주 도시철도와 함께하는 스마트 여행</span>
+      <button class="cta-btn" onclick="showStationExplore()">역별 탐색 시작하기 →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     추천 여행 코스 모달
+══════════════════════════════════════ -->
+<div class="course-overlay" id="courseOverlay">
+  <div class="course-modal">
+
+    <!-- 헤더 -->
+    <div class="course-modal-header">
+      <button class="course-back" onclick="closeCourseModal()">←</button>
+      <div class="ch-title-wrap">
+        <span class="ch-main">🗺️ 추천 여행 코스</span>
+        <span class="ch-sub">지하철로 떠나는 광주 하루 여행</span>
+      </div>
+      <div class="ch-stats">
+        <div class="ch-stat"><div class="n">3</div><div class="l">추천 코스</div></div>
+        <div class="ch-stat"><div class="n">9</div><div class="l">주요 장소</div></div>
+        <div class="ch-stat"><div class="n">3</div><div class="l">노선 활용</div></div>
+      </div>
+    </div>
+
+    <!-- 탭 -->
+    <div class="course-tab-bar">
+      <button class="course-tab active" onclick="switchCourseTab(0)">
+        <span class="tab-num">1</span> 양림동 · 동명동 · ACC 코스
+      </button>
+      <button class="course-tab" onclick="switchCourseTab(1)">
+        <span class="tab-num">2</span> 전남대 · 조선대 · 남광주 코스
+      </button>
+      <button class="course-tab" onclick="switchCourseTab(2)">
+        <span class="tab-num">3</span> 상무 · 운천 · 쌍촌 코스
+      </button>
+    </div>
+
+    <!-- 본문 -->
+    <div class="course-body" id="courseBody">
+      <div class="course-inner">
+
+      <!-- ── 코스 1 ── -->
+      <div class="course-panel active" id="coursePanel0">
+        <div class="course-summary" style="background:linear-gradient(135deg,#009d8e,#00B5A2);">
+          <div class="cs-left">
+            <div class="cs-course-num">COURSE 01</div>
+            <div class="cs-title">역사 · 감성 · 문화 하루 코스</div>
+            <div class="cs-desc">광주의 근대 골목부터 트렌디한 카페거리,<br>세계적 문화 복합공간까지 한 번에 즐기는 코스</div>
+            <div class="cs-tags">
+              <span class="cs-tag">🏛️ 역사</span>
+              <span class="cs-tag">☕ 카페</span>
+              <span class="cs-tag">🎭 문화</span>
+              <span class="cs-tag">도보 중심</span>
+            </div>
+          </div>
+          <div class="cs-right">
+            <div class="cs-meta">
+              🚇 남광주역 출발<br>
+              ⏱️ 약 8~10시간<br>
+              💰 중간 비용<br>
+              👥 커플·친구 추천
+            </div>
+          </div>
+        </div>
+
+        <div class="course-timeline">
+
+          <!-- 아침 -->
+          <div class="timeline-step">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:#00B5A2;">🌅</div>
+              <div class="tl-line" style="background:linear-gradient(to bottom,#00B5A2,#e8faf8);"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-station-badge" style="background:#e8faf8;color:#00B5A2;border-color:#b2ece6;">
+                🚇 남광주역 하차
+              </div>
+              <div class="tl-place-card">
+                <div class="tl-time-badge morning">🌄 오전 · 아침</div>
+                <div class="tl-place-name">양림동 펭귄마을</div>
+                <div class="tl-place-desc">
+                  1960~70년대 골목길이 그대로 보존된 광주의 대표 근대문화마을. 좁은 골목 사이로 벽화와 조형물, 앙증맞은 펭귄 캐릭터들이 가득합니다. 이른 아침 한적할 때 방문하면 더욱 운치 있어요.
+                </div>
+                <div class="tl-place-meta">
+                  <span class="tl-meta-chip">📍 남구 양림동</span>
+                  <span class="tl-meta-chip">🚶 남광주역 도보 10분</span>
+                  <span class="tl-meta-chip">🕘 상시 개방</span>
+                  <span class="tl-meta-chip">💰 무료</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 이동 -->
+          <div class="tl-transfer">
+            <div class="tl-transfer-arrow">🚇 1호선 → 남광주역 → 문화전당역 (1정거장)</div>
+          </div>
+
+          <!-- 점심 -->
+          <div class="timeline-step">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:#f0a500;">☀️</div>
+              <div class="tl-line" style="background:linear-gradient(to bottom,#f0a500,#fff8e1);"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-station-badge" style="background:#fff8e1;color:#e65100;border-color:#fdd9b5;">
+                🚇 문화전당역 인근
+              </div>
+              <div class="tl-place-card">
+                <div class="tl-time-badge lunch">🍽️ 점심</div>
+                <div class="tl-place-name">동명동 카페거리</div>
+                <div class="tl-place-desc">
+                  광주에서 가장 핫한 카페·브런치 거리. 오래된 주택과 건물을 개조한 개성 넘치는 카페들이 골목마다 들어서 있어, 브런치부터 디저트까지 취향껏 골라 즐길 수 있는 광주 최고의 감성 핫플입니다.
+                </div>
+                <div class="tl-place-meta">
+                  <span class="tl-meta-chip">📍 동구 동명동</span>
+                  <span class="tl-meta-chip">🚶 문화전당역 도보 15분</span>
+                  <span class="tl-meta-chip">☕ 카페·브런치</span>
+                  <span class="tl-meta-chip">💰 1만~2만원대</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 이동 -->
+          <div class="tl-transfer">
+            <div class="tl-transfer-arrow">🚶 도보 이동 약 5분</div>
+          </div>
+
+          <!-- 저녁 -->
+          <div class="timeline-step">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:#3949ab;">🌆</div>
+              <div class="tl-line" style="background:none;"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-station-badge" style="background:#e8eaf6;color:#283593;border-color:#c5cae9;">
+                🚇 문화전당역 도보권
+              </div>
+              <div class="tl-place-card">
+                <div class="tl-time-badge evening">🌃 저녁</div>
+                <div class="tl-place-name">ACC (국립아시아문화전당)</div>
+                <div class="tl-place-desc">
+                  아시아 최대 규모의 복합문화공간. 5·18 민주화운동의 역사적 현장 위에 세워진 공간으로, 상설 전시부터 공연, 어린이 문화원까지 다양한 프로그램을 운영합니다. 야간 조명이 특히 아름다워 저녁 방문을 추천합니다.
+                </div>
+                <div class="tl-place-meta">
+                  <span class="tl-meta-chip">📍 동구 광산동</span>
+                  <span class="tl-meta-chip">🚇 문화전당역 바로 앞</span>
+                  <span class="tl-meta-chip">🏛️ 문화시설</span>
+                  <span class="tl-meta-chip">🕖 화~일 10:00-18:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /코스1 -->
+
+      <!-- ── 코스 2 ── -->
+      <div class="course-panel" id="coursePanel1">
+        <div class="course-summary" style="background:linear-gradient(135deg,#1565c0,#0052A4);">
+          <div class="cs-left">
+            <div class="cs-course-num">COURSE 02</div>
+            <div class="cs-title">대학 캠퍼스 · 자연 · 야시장 코스</div>
+            <div class="cs-desc">메타세쿼이아 숲길부터 조선대 캠퍼스,<br>활기찬 남광주 야시장까지 다채로운 하루</div>
+            <div class="cs-tags">
+              <span class="cs-tag">🌲 자연</span>
+              <span class="cs-tag">🏫 캠퍼스</span>
+              <span class="cs-tag">🍢 야시장</span>
+              <span class="cs-tag">2호선 활용</span>
+            </div>
+          </div>
+          <div class="cs-right">
+            <div class="cs-meta">
+              🚇 전남대역 출발<br>
+              ⏱️ 약 9~11시간<br>
+              💰 저렴한 비용<br>
+              👥 가족·연인 추천
+            </div>
+          </div>
+        </div>
+
+        <div class="course-timeline">
+
+          <div class="timeline-step">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:#0052A4;">🌅</div>
+              <div class="tl-line" style="background:linear-gradient(to bottom,#0052A4,#e6eef8);"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-station-badge" style="background:#e6eef8;color:#0052A4;border-color:#b3c8f0;">
+                🚇 전남대역 하차
+              </div>
+              <div class="tl-place-card">
+                <div class="tl-time-badge morning">🌄 오전 · 아침</div>
+                <div class="tl-place-name">전남대 메타세쿼이아길</div>
+                <div class="tl-place-desc">
+                  전남대학교 정문 앞 수십 년 된 메타세쿼이아 나무들이 만드는 웅장한 가로수 터널. 아침 빛이 나뭇잎 사이로 쏟아지는 시간에 걷는 것이 가장 아름다우며, 광주 시민들이 사랑하는 산책 명소입니다.
+                </div>
+                <div class="tl-place-meta">
+                  <span class="tl-meta-chip">📍 북구 용봉동</span>
+                  <span class="tl-meta-chip">🚶 전남대역 도보 3분</span>
+                  <span class="tl-meta-chip">🌲 산책로</span>
+                  <span class="tl-meta-chip">💰 무료</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-transfer">
+            <div class="tl-transfer-arrow">🚇 2호선 → 전남대역 → 조선대역 (환승 없이 직통)</div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:#f0a500;">☀️</div>
+              <div class="tl-line" style="background:linear-gradient(to bottom,#f0a500,#fff8e1);"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-station-badge" style="background:#fff8e1;color:#e65100;border-color:#fdd9b5;">
+                🚇 조선대역 하차
+              </div>
+              <div class="tl-place-card">
+                <div class="tl-time-badge lunch">🍽️ 점심</div>
+                <div class="tl-place-name">조선대학교 캠퍼스 & 주변 맛집</div>
+                <div class="tl-place-desc">
+                  아름다운 언덕 위 캠퍼스를 산책한 뒤, 대학가 특유의 저렴하고 맛있는 식당에서 점심을 즐기세요. 학생들에게 검증된 한식·분식집이 많아 가성비 좋은 한 끼를 먹을 수 있습니다.
+                </div>
+                <div class="tl-place-meta">
+                  <span class="tl-meta-chip">📍 동구 서석동</span>
+                  <span class="tl-meta-chip">🚶 조선대역 도보 5분</span>
+                  <span class="tl-meta-chip">🍚 한식·분식</span>
+                  <span class="tl-meta-chip">💰 5천~1만원대</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-transfer">
+            <div class="tl-transfer-arrow">🚇 2호선 → 조선대역 → 남광주역 (2정거장)</div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:#c62828;">🌆</div>
+              <div class="tl-line" style="background:none;"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-station-badge" style="background:#ffebee;color:#c62828;border-color:#ffcdd2;">
+                🚇 남광주역 하차
+              </div>
+              <div class="tl-place-card">
+                <div class="tl-time-badge evening">🌃 저녁</div>
+                <div class="tl-place-name">남광주 시장 야시장</div>
+                <div class="tl-place-desc">
+                  광주 최대 전통시장 중 하나인 남광주시장이 저녁이 되면 야시장으로 변신합니다. 각종 먹거리 포장마차가 늘어서 활기찬 분위기를 즐길 수 있으며, 광주의 로컬 음식 문화를 가장 생생하게 체험할 수 있는 곳입니다.
+                </div>
+                <div class="tl-place-meta">
+                  <span class="tl-meta-chip">📍 동구 남동</span>
+                  <span class="tl-meta-chip">🚇 남광주역 도보 3분</span>
+                  <span class="tl-meta-chip">🍢 야시장·포장마차</span>
+                  <span class="tl-meta-chip">🕕 17:00~ 심야</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /코스2 -->
+
+      <!-- ── 코스 3 ── -->
+      <div class="course-panel" id="coursePanel2">
+        <div class="course-summary" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);">
+          <div class="cs-left">
+            <div class="cs-course-num">COURSE 03</div>
+            <div class="cs-title">공원 · 자연 · 감성카페 코스</div>
+            <div class="cs-desc">상무지구의 넓은 공원과 저수지 산책,<br>쌍촌동 감성 카페에서 마무리하는 여유로운 코스</div>
+            <div class="cs-tags">
+              <span class="cs-tag">🌿 공원</span>
+              <span class="cs-tag">🏞️ 저수지</span>
+              <span class="cs-tag">☕ 감성카페</span>
+              <span class="cs-tag">힐링 코스</span>
+            </div>
+          </div>
+          <div class="cs-right">
+            <div class="cs-meta">
+              🚇 상무역 출발<br>
+              ⏱️ 약 7~9시간<br>
+              💰 중간 비용<br>
+              👥 혼자·커플 추천
+            </div>
+          </div>
+        </div>
+
+        <div class="course-timeline">
+
+          <div class="timeline-step">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:#7b1fa2;">🌅</div>
+              <div class="tl-line" style="background:linear-gradient(to bottom,#7b1fa2,#f3e5f5);"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-station-badge" style="background:#f3e5f5;color:#6a1b9a;border-color:#ce93d8;">
+                🚇 상무역 하차
+              </div>
+              <div class="tl-place-card">
+                <div class="tl-time-badge morning">🌄 오전 · 아침</div>
+                <div class="tl-place-name">상무시민공원 &amp; 시청 주변 맛집</div>
+                <div class="tl-place-desc">
+                  광주 서구의 중심 대형 공원인 상무시민공원에서 아침 산책을 즐기세요. 넓은 잔디밭과 호수, 산책로가 잘 조성되어 있습니다. 공원 주변 시청 일대에는 아침 식사 가능한 카페와 베이커리가 많아 여유롭게 브런치를 즐길 수 있습니다.
+                </div>
+                <div class="tl-place-meta">
+                  <span class="tl-meta-chip">📍 서구 치평동</span>
+                  <span class="tl-meta-chip">🚇 상무역 도보 5분</span>
+                  <span class="tl-meta-chip">🌿 공원·산책</span>
+                  <span class="tl-meta-chip">💰 무료 (식비 별도)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-transfer">
+            <div class="tl-transfer-arrow">🚇 1호선 → 상무역 → 운천역 (2정거장)</div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:#f0a500;">☀️</div>
+              <div class="tl-line" style="background:linear-gradient(to bottom,#f0a500,#fff8e1);"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-station-badge" style="background:#fff8e1;color:#e65100;border-color:#fdd9b5;">
+                🚇 운천역 하차
+              </div>
+              <div class="tl-place-card">
+                <div class="tl-time-badge lunch">🍽️ 점심</div>
+                <div class="tl-place-name">운천저수지</div>
+                <div class="tl-place-desc">
+                  도심 속 고즈넉한 저수지로, 주변에 산책로와 벤치가 잘 갖춰져 있습니다. 저수지를 바라보며 근처 식당에서 점심을 먹는 것을 추천합니다. 특히 봄·가을 단풍 시즌에 경치가 빼어납니다.
+                </div>
+                <div class="tl-place-meta">
+                  <span class="tl-meta-chip">📍 서구 운천동</span>
+                  <span class="tl-meta-chip">🚶 운천역 도보 10분</span>
+                  <span class="tl-meta-chip">🏞️ 자연·산책</span>
+                  <span class="tl-meta-chip">💰 무료</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-transfer">
+            <div class="tl-transfer-arrow">🚇 1호선 → 운천역 → 쌍촌역 (1정거장)</div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:#4527a0;">🌆</div>
+              <div class="tl-line" style="background:none;"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-station-badge" style="background:#ede7f6;color:#4527a0;border-color:#b39ddb;">
+                🚇 쌍촌역 하차
+              </div>
+              <div class="tl-place-card">
+                <div class="tl-time-badge evening">🌃 저녁</div>
+                <div class="tl-place-name">쌍촌 감성 카페</div>
+                <div class="tl-place-desc">
+                  쌍촌동 일대에 자리잡은 인테리어 맛집 감성 카페들. 오래된 주택을 개조한 독특한 공간, 루프탑이 있는 카페 등 각자 개성 있는 카페들이 모여 광주 카페 투어의 성지로 자리잡았습니다. 저녁 조명이 켜지면 더욱 분위기 있습니다.
+                </div>
+                <div class="tl-place-meta">
+                  <span class="tl-meta-chip">📍 서구 쌍촌동</span>
+                  <span class="tl-meta-chip">🚇 쌍촌역 도보 5~10분</span>
+                  <span class="tl-meta-chip">☕ 카페·디저트</span>
+                  <span class="tl-meta-chip">💰 6천~1만원대</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /코스3 -->
+
+      </div><!-- /course-inner -->
+    </div><!-- /course-body -->
+
+    <!-- 푸터 -->
+    <div class="course-footer">
+      <span class="cf-note">🚇 코스는 당일치기 기준이며, 이동 시간은 환경에 따라 다를 수 있습니다.</span>
+      <div class="cf-btns">
+        <button class="cf-btn" onclick="closeCourseModal()">닫기</button>
+        <button class="cf-btn primary" onclick="closeCourseModal()">역별 탐색으로 이동 →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     핫플 & 맛집 전체화면 모달
+══════════════════════════════════════ -->
+<div class="hotplace-overlay" id="hotplaceOverlay">
+
+  <div class="hp-header">
+    <button class="hp-back" onclick="closeHotplaceModal()">←</button>
+    <div class="hp-title-wrap">
+      <span class="hp-main-title">✨ 핫플 &amp; 맛집</span>
+      <span class="hp-sub">광주 지하철 역 주변 인기 장소 모음</span>
+    </div>
+    <div class="hp-search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="hpSearchInput" class="hp-search-input"
+        placeholder="장소명, 역이름, 주소로 검색..."
+        oninput="onHpSearchInput(this.value)"
+        onkeydown="if(event.key==='Enter') runHpSearch()" />
+      <button class="hp-search-clear" id="hpSearchClear" onclick="clearHpSearch()">✕</button>
+    </div>
+    <div class="hp-header-right">
+      <div class="hp-count-badge">총 <span id="hpTotalCount">0</span>곳</div>
+    </div>
+  </div>
+
+  <div class="hp-toolbar">
+    <span class="hp-filter-label">카테고리</span>
+    <div class="hp-filter-scroll">
+      <button class="hp-filter-btn active" onclick="setHpCategory('전체')">전체</button>
+      <button class="hp-filter-btn" onclick="setHpCategory('핫플')">✨ 핫플</button>
+      <button class="hp-filter-btn" onclick="setHpCategory('관광지')">🗺️ 관광지</button>
+      <button class="hp-filter-btn" onclick="setHpCategory('문화시설')">🏛️ 문화시설</button>
+      <button class="hp-filter-btn" onclick="setHpCategory('한식')">🍚 한식</button>
+      <button class="hp-filter-btn" onclick="setHpCategory('카페')">☕ 카페</button>
+      <button class="hp-filter-btn" onclick="setHpCategory('일식')">🍣 일식</button>
+      <button class="hp-filter-btn" onclick="setHpCategory('중식')">🥢 중식</button>
+      <button class="hp-filter-btn" onclick="setHpCategory('디저트')">🍰 디저트</button>
+    </div>
+    <div class="hp-sort-wrap">
+      <button class="hp-sort-btn active" id="hpSortScore" onclick="setHpSort('score')">⭐ 점수순</button>
+      <button class="hp-sort-btn" id="hpSortName" onclick="setHpSort('name')">가나다순</button>
+    </div>
+  </div>
+
+  <div class="hp-keyword-row" id="hpKeywordRow">
+    <span class="hp-keyword-label">검색어</span>
+    <span class="hp-keyword-tag">
+      <span id="hpKeywordText"></span>
+      <button onclick="clearHpSearch()">✕</button>
+    </span>
+  </div>
+
+  <div class="hp-body">
+    <div class="hp-sidebar">
+      <div class="hp-side-section">
+        <h4>구 · 지역</h4>
+        <div id="hpDistrictList"></div>
+      </div>
+      <div class="hp-side-list" id="hpStationFilterList"></div>
+    </div>
+    <div class="hp-grid-wrap" id="hpGridWrap">
+      <div class="hp-result-bar">
+        <div class="result-text" id="hpResultText">불러오는 중...</div>
+        <div class="view-toggle">
+          <button class="view-btn active" id="viewGrid" onclick="setHpView('grid')">⊞</button>
+          <button class="view-btn" id="viewList" onclick="setHpView('list')">☰</button>
+        </div>
+      </div>
+      <div class="hp-grid" id="hpGrid"></div>
+      <div class="hp-pagination" id="hpPagination"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     기존 앱 UI
+══════════════════════════════════════ -->
+
+
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-icon">🚇</div>
+    <div class="logo-text">
+      <span class="brand">TOUR GWANGJU</span>
+      <span class="sub">지하철 2호선과 함께하는 광주 여행</span>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#" onclick="openHomeModal(); return false;" class="active">홈</a>
+    <a href="#" onclick="showStationExplore(); return false;">역별 탐색</a>
+    <a href="#" onclick="openCourseModal(); return false;">추천 여행 코스</a>
+    <a href="#" onclick="openHotplaceModal(); return false;">핫플 &amp; 맛집</a>
+    <a href="https://www.grtc.co.kr/cyber" target="_blank" rel="noopener noreferrer">실시간 이동 안내</a>
+  </div>
+  <div class="nav-right">
+  <button onclick="showMyFavorites()">♡ 즐겨찾기</button>
+  <button onclick="openAuthModal()" class="btn-primary" id="loginBtn">로그인</button>
+</div>
+</nav>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3>노선도</h3>
+      <div class="line-tabs">
+        <button class="line-tab line1 active" onclick="switchLine(1)">1호선</button>
+        <button class="line-tab line2" onclick="switchLine(2)">2호선</button>
+      </div>
+    </div>
+    <div class="station-list" id="stationList"></div>
+    <div class="sidebar-footer">
+      <button onclick="alert('전체 노선도 뷰는 준비 중입니다.')">전체 노선도 보기</button>
+    </div>
+  </aside>
+
+  <div class="map-area">
+    <div class="map-header">
+      <div class="map-station-info">
+        <div class="loc-icon" id="mapLocIcon">🚇 노선도</div>
+        <h2 id="mapStationName">역을 선택해 주세요</h2>
+        <div class="sub-desc" id="mapStationDesc">역을 클릭하면 주변 맛집·관광 정보를 확인할 수 있어요</div>
+      </div>
+      <button class="map-detail-btn" onclick="showDetail()">📋 역 정보 보기</button>
+    </div>
+
+    <div id="kakaoMap" style="position:absolute;top:80px;left:0;right:0;bottom:0;width:100%;height:calc(100% - 80px);z-index:1;"></div>
+
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--line1);"></div> 1호선</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--line2);"></div> 2호선</div>
+      <div class="legend-item"><div class="legend-dot" style="background:white;border:2.5px solid #e67e22;box-sizing:border-box;"></div> 환승역</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e74c3c;"></div> 선택역</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div id="stationDetailCard"></div>
+    <div class="panel-filter">
+      <button class="filter-btn active" onclick="filterPlaces('전체')">전체</button>
+      <button class="filter-btn" onclick="filterPlaces('관광지')">🗺️ 관광지</button>
+      <button class="filter-btn" onclick="filterPlaces('문화시설')">🏛️ 문화시설</button>
+      <button class="filter-btn" onclick="filterPlaces('한식')">🍚 한식</button>
+      <button class="filter-btn" onclick="filterPlaces('카페')">☕ 카페</button>
+      <button class="filter-btn" onclick="filterPlaces('일식')">🍣 일식</button>
+      <button class="filter-btn" onclick="filterPlaces('중식')">🥢 중식</button>
+      <button class="filter-btn" onclick="filterPlaces('디저트')">🍰 디저트</button>
+      <button class="filter-btn" onclick="filterPlaces('핫플')">✨ 핫플</button>
+    </div>
+    <div class="panel-result-header">
+      <h4 id="panelTitle">역 주변 맛집 TOP 5</h4>
+      <button class="sort-btn">가까운순 ▾</button>
+    </div>
+    <div class="place-list" id="placeList">
+      <div class="empty-state">
+        <div class="emoji">🗺️</div>
+        <p>왼쪽 노선도에서 역을 선택하면<br>주변 맛집 및 관광 정보를 확인할 수 있어요!</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="modal-bg" id="authModal">
+  <div class="auth-modal">
+    <button class="close-modal" onclick="closeAuthModal()">×</button>
+
+    <h2 id="authTitle">로그인</h2>
+    <p id="authDesc">TOUR GWANGJU에 로그인하고 즐겨찾기를 저장하세요.</p>
+
+    <input type="text" id="authName" placeholder="이름" style="display:none;">
+    <input type="text" id="authId" placeholder="아이디">
+    <input type="password" id="authPw" placeholder="비밀번호">
+    <div id="loginError" class="login-error">
+  ❌ 아이디 또는 비밀번호가 올바르지 않습니다.
+</div>
+
+    <button class="auth-btn" onclick="submitAuth()">로그인</button>
+
+    <div class="auth-switch">
+      <span id="authSwitchText">회원가입하기</span>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="myPageModal">
+  <div class="mypage-modal">
+    <button class="close-modal" onclick="closeMyPage()">×</button>
+
+    <h2>마이페이지</h2>
+    <p id="myPageUserInfo"></p>
+
+    <div class="mypage-section">
+      <h3>❤️ 나의 즐겨찾기</h3>
+      <div id="myFavoriteList" class="mypage-list"></div>
+    </div>
+
+    <div class="mypage-section">
+      <h3>🍽️ 내가 추천하는 맛집</h3>
+      <input id="recommendName" class="mypage-input" placeholder="맛집 이름">
+      <input id="recommendAddress" class="mypage-input" placeholder="주소 또는 위치">
+      <input id="recommendMemo" class="mypage-input" placeholder="추천 이유">
+      <button class="mypage-btn" onclick="addMyRecommend()">추천 맛집 저장</button>
+
+      <div id="myRecommendList" class="mypage-list" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="mypage-section"><button class="mypage-btn" onclick="logout()">로그아웃</button>
+      <button class="mypage-btn danger-btn" onclick="deleteAccount()">회원탈퇴</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="favoriteModal">
+  <div class="mypage-modal">
+    <button class="close-modal" onclick="closeFavoriteModal()">×</button>
+
+    <h2>❤️ 나의 즐겨찾기</h2>
+    <p>내가 저장한 맛집 목록입니다.</p>
+
+    <div id="favoritePopupList" class="mypage-list"></div>
+  </div>
+</div>
+<div class="modal-bg" id="reviewModal">
+  <div class="mypage-modal">
+    <button class="close-modal" onclick="closeReviewModal()">×</button>
+
+    <h2 id="reviewPlaceTitle">리뷰</h2>
+    <p>로그인한 회원만 리뷰를 작성할 수 있습니다.</p>
+
+    <div class="mypage-section">
+      <h3>✍️ 리뷰 작성</h3>
+      <input id="reviewScore" class="mypage-input" type="number" min="1" max="5" placeholder="평점 1~5">
+      <input id="reviewText" class="mypage-input" placeholder="리뷰 내용을 입력하세요">
+      <button class="mypage-btn" onclick="addReview()">리뷰 등록</button>
+    </div>
+
+    <div class="mypage-section">
+      <h3>💬 리뷰 목록</h3>
+      <div id="reviewList" class="mypage-list"></div>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="welcomeModal">
+  <div class="welcome-modal">
+    <button class="close-modal" onclick="closeWelcomeModal()">×</button>
+
+    <div class="welcome-icon">🚇</div>
+    <h2 id="welcomeTitle">환영합니다!</h2>
+    <p>TOUR GWANGJU에서 나만의 광주 투어를 관리해보세요.</p>
+
+    <div class="welcome-actions">
+      <div class="welcome-card" onclick="goMyPageFromWelcome()">
+        <div class="big">👤</div>
+        <b>마이페이지</b>
+        <span>내 정보와 추천 맛집 관리</span>
+      </div>
+
+      <div class="welcome-card" onclick="goFavoriteFromWelcome()">
+        <div class="big">❤️</div>
+        <b>나의 맛집</b>
+        <span>즐겨찾기한 맛집 보기</span>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=b1fce2cd29f2a1f4a1d427e5c6b3d7a4&libraries=services"></script>
+
+<script>
+// ─────────────────────────────────────────
+//  API 설정 (백엔드 서버 주소)
+// ─────────────────────────────────────────
+const API_BASE = 'http://localhost:3000/api';
+
+// ─────────────────────────────────────────
+//  역 데이터 (좌표 포함 - 카카오맵 마커용)
+// ─────────────────────────────────────────
+const STATIONS = {
+  1: [ // 1호선
+    { station_id:1,  line_id:1, station_name:'녹동',           district:'동구', station_code:'L1-101', latitude:35.106983, longitude:126.933932, is_transfer:false, open_date:'2004-04-28', address:'광주 동구 월남동' },
+    { station_id:2,  line_id:1, station_name:'소태',           district:'동구', station_code:'L1-102', latitude:35.123800, longitude:126.932393, is_transfer:false, open_date:'2004-04-28', address:'광주 동구 소태동' },
+    { station_id:3,  line_id:1, station_name:'학동·증심사입구', district:'동구', station_code:'L1-103', latitude:35.132950, longitude:126.928430, is_transfer:false, open_date:'2004-04-28', address:'광주 동구 학동' },
+    { station_id:4,  line_id:1, station_name:'남광주',         district:'동구', station_code:'L1-104', latitude:35.139540, longitude:126.922831, is_transfer:true,  open_date:'2004-04-28', address:'광주 동구 남동' },
+    { station_id:5,  line_id:1, station_name:'문화전당',       district:'동구', station_code:'L1-105', latitude:35.146479, longitude:126.920041, is_transfer:false, open_date:'2004-04-28', address:'광주 동구 광산동' },
+    { station_id:6,  line_id:1, station_name:'금남로4가',      district:'동구', station_code:'L1-106', latitude:35.150888, longitude:126.914414, is_transfer:false, open_date:'2004-04-28', address:'광주 동구 금남로4가' },
+    { station_id:7,  line_id:1, station_name:'금남로5가',      district:'동구', station_code:'L1-107', latitude:35.153754, longitude:126.910034, is_transfer:false, open_date:'2004-04-28', address:'광주 동구 금남로5가' },
+    { station_id:8,  line_id:1, station_name:'양동시장',       district:'서구', station_code:'L1-108', latitude:35.154432, longitude:126.901343, is_transfer:false, open_date:'2004-04-28', address:'광주 서구 양동' },
+    { station_id:9,  line_id:1, station_name:'돌고개',         district:'남구', station_code:'L1-109', latitude:35.151951, longitude:126.895481, is_transfer:false, open_date:'2004-04-28', address:'광주 남구 월산동' },
+    { station_id:10, line_id:1, station_name:'농성',           district:'서구', station_code:'L1-110', latitude:35.153326, longitude:126.883941, is_transfer:false, open_date:'2004-04-28', address:'광주 서구 농성동' },
+    { station_id:11, line_id:1, station_name:'화정',           district:'서구', station_code:'L1-111', latitude:35.152005, longitude:126.876689, is_transfer:false, open_date:'2004-04-28', address:'광주 서구 화정동' },
+    { station_id:12, line_id:1, station_name:'쌍촌',           district:'서구', station_code:'L1-112', latitude:35.151715, longitude:126.869587, is_transfer:false, open_date:'2004-04-28', address:'광주 서구 쌍촌동' },
+    { station_id:13, line_id:1, station_name:'운천',           district:'서구', station_code:'L1-113', latitude:35.150650, longitude:126.858538, is_transfer:false, open_date:'2004-04-28', address:'광주 서구 운천동' },
+    { station_id:14, line_id:1, station_name:'상무',           district:'서구', station_code:'L1-114', latitude:35.146764, longitude:126.848555, is_transfer:true,  open_date:'2004-04-28', address:'광주 서구 치평동' },
+    { station_id:15, line_id:1, station_name:'김대중컨벤션센터', district:'서구', station_code:'L1-115', latitude:35.142742, longitude:126.840653, is_transfer:false, open_date:'2008-04-11', address:'광주 서구 마륵동' },
+    { station_id:16, line_id:1, station_name:'공항',           district:'광산구', station_code:'L1-116', latitude:35.144114, longitude:126.811881, is_transfer:false, open_date:'2008-04-11', address:'광주 광산구 신창동' },
+    { station_id:17, line_id:1, station_name:'송정공원',       district:'광산구', station_code:'L1-117', latitude:35.143670, longitude:126.799430, is_transfer:false, open_date:'2008-04-11', address:'광주 광산구 송정동' },
+    { station_id:18, line_id:1, station_name:'광주송정역',     district:'광산구', station_code:'L1-118', latitude:35.137558, longitude:126.791523, is_transfer:false, open_date:'2008-04-11', address:'광주 광산구 송정동' },
+    { station_id:19, line_id:1, station_name:'도산',           district:'광산구', station_code:'L1-119', latitude:35.131989, longitude:126.788100, is_transfer:false, open_date:'2008-04-11', address:'광주 광산구 도산동' },
+    { station_id:20, line_id:1, station_name:'평동',           district:'광산구', station_code:'L1-120', latitude:35.124914, longitude:126.769561, is_transfer:false, open_date:'2008-04-11', address:'광주 광산구 월전동' },
+  ],
+  2: [ // 2호선
+    { station_id:21, line_id:2, station_name:'시청',         district:'서구', station_code:'L2-201', latitude:35.158711, longitude:126.848468, is_transfer:false, open_date:'2026-12-01', address:'광주 서구 치평동' },
+    { station_id:22, line_id:2, station_name:'치평',         district:'서구', station_code:'L2-202', latitude:35.151705, longitude:126.848268, is_transfer:false, open_date:'2026-12-01', address:'광주 서구 치평동' },
+    { station_id:23, line_id:2, station_name:'상무',         district:'서구', station_code:'L2-203', latitude:35.146764, longitude:126.848555, is_transfer:true,  open_date:'2026-12-01', address:'광주 서구 치평동' },
+    { station_id:24, line_id:2, station_name:'금호', district:'서구', station_code:'L2-204', latitude:35.135577, longitude:126.859038, is_transfer:false, open_date:'2026-12-01', address:'광주 서구 금호동' },
+    { station_id:25, line_id:2, station_name:'금호지구입구',         district:'서구', station_code:'L2-205', latitude:35.144281, longitude:126.857285, is_transfer:false, open_date:'2026-12-01', address:'광주 서구 금호동' },
+    { station_id:26, line_id:2, station_name:'풍암어린이공원', district:'서구', station_code:'L2-206', latitude:35.132804, longitude:126.861620, is_transfer:false, open_date:'2026-12-01', address:'광주 서구 풍암동' },
+    { station_id:27, line_id:2, station_name:'월드컵경기장',  district:'서구', station_code:'L2-207', latitude:35.134604, longitude:126.871874, is_transfer:false, open_date:'2026-12-01', address:'광주 서구 풍암동' },
+    { station_id:28, line_id:2, station_name:'풍암저수지',  district:'남구', station_code:'L2-208', latitude:35.126933, longitude:126.875977, is_transfer:false, open_date:'2026-12-01', address:'광주 남구 주월동' },
+    { station_id:29, line_id:2, station_name:'회재',     district:'남구', station_code:'L2-209', latitude:35.130148, longitude:126.886519, is_transfer:false, open_date:'2026-12-01', address:'광주 남구 백운동' },
+    { station_id:30, line_id:2, station_name:'진월',         district:'남구', station_code:'L2-210', latitude:35.133792, longitude:126.896238, is_transfer:false, open_date:'2026-12-01', address:'광주 남구 진월동' },
+    { station_id:31, line_id:2, station_name:'백운광장',         district:'남구', station_code:'L2-211', latitude:35.133311, longitude:126.902145, is_transfer:false, open_date:'2026-12-01', address:'광주 남구 봉선동' },
+    { station_id:32, line_id:2, station_name:'봉선',       district:'동구', station_code:'L2-212', latitude:35.133817, longitude:126.907716, is_transfer:true,  open_date:'2026-12-01', address:'광주 동구 남동' },
+    { station_id:33, line_id:2, station_name:'방림',       district:'동구', station_code:'L2-213', latitude:35.135805, longitude:126.917965, is_transfer:false, open_date:'2026-12-01', address:'광주 동구 서석동' },
+    { station_id:34, line_id:2, station_name:'남광주',   district:'동구', station_code:'L2-214', latitude:35.139540, longitude:126.922831, is_transfer:false, open_date:'2026-12-01', address:'광주 동구 학동' },
+    { station_id:35, line_id:2, station_name:'조선대',     district:'동구', station_code:'L2-215', latitude:35.144194, longitude:126.925917, is_transfer:false, open_date:'2026-12-01', address:'광주 동구 서석동' },
+    { station_id:36, line_id:2, station_name:'조선대후문',         district:'동구', station_code:'L2-216', latitude:35.149259, longitude:126.929385, is_transfer:false, open_date:'2026-12-01', address:'광주 동구 지산동' },
+    { station_id:37, line_id:2, station_name:'두암',         district:'동구', station_code:'L2-217', latitude:35.160230, longitude:126.930841, is_transfer:false, open_date:'2026-12-01', address:'광주 동구 동명동' },
+    { station_id:38, line_id:2, station_name:'광주교대',         district:'동구', station_code:'L2-218', latitude:35.164106, longitude:126.922779, is_transfer:false, open_date:'2026-12-01', address:'광주 동구 계림동' },
+    { station_id:39, line_id:2, station_name:'광주역',       district:'북구', station_code:'L2-219', latitude:35.166606, longitude:126.912170, is_transfer:false, open_date:'2026-12-01', address:'광주 북구 중흥동' },
+    { station_id:40, line_id:2, station_name:'북구청',         district:'북구', station_code:'L2-220', latitude:35.173794, longitude:126.912743, is_transfer:false, open_date:'2026-12-01', address:'광주 북구 중흥동' },
+    { station_id:41, line_id:2, station_name:'전남대',       district:'북구', station_code:'L2-221', latitude:35.181295, longitude:126.910736, is_transfer:false, open_date:'2029-12-01', address:'광주 북구 용봉동' },
+    { station_id:42, line_id:2, station_name:'전남대후문',   district:'북구', station_code:'L2-222', latitude:35.183951, longitude:126.905765, is_transfer:false, open_date:'2029-12-01', address:'광주 북구 용봉동' },
+    { station_id:43, line_id:2, station_name:'광주공고',         district:'북구', station_code:'L2-223', latitude:35.187466, longitude:126.898597, is_transfer:false, open_date:'2029-12-01', address:'광주 북구 오치동' },
+    { station_id:44, line_id:2, station_name:'고려고',       district:'북구', station_code:'L2-224', latitude:35.194783, longitude:126.899770, is_transfer:false, open_date:'2029-12-01', address:'광주 북구 오치동' },
+    { station_id:45, line_id:2, station_name:'일곡지구',         district:'북구', station_code:'L2-225', latitude:35.202635, longitude:126.897324, is_transfer:false, open_date:'2029-12-01', address:'광주 북구 일곡동' },
+    { station_id:46, line_id:2, station_name:'매곡',         district:'북구', station_code:'L2-226', latitude:35.197786, longitude:126.883477, is_transfer:false, open_date:'2029-12-01', address:'광주 북구 매곡동' },
+    { station_id:47, line_id:2, station_name:'본촌공단',         district:'북구', station_code:'L2-227', latitude:35.199010, longitude:126.876040, is_transfer:false, open_date:'2029-12-01', address:'광주 북구 본촌동' },
+    { station_id:48, line_id:2, station_name:'양산',         district:'광산구', station_code:'L2-228', latitude:35.202201, longitude:126.874115, is_transfer:false, open_date:'2029-12-01', address:'광주 광산구 양동' },
+    { station_id:49, line_id:2, station_name:'첨단지구',         district:'광산구', station_code:'L2-229', latitude:35.211337, longitude:126.874222, is_transfer:false, open_date:'2029-12-01', address:'광주 광산구 월계동' },
+    { station_id:50, line_id:2, station_name:'첨단2지구',    district:'광산구', station_code:'L2-230', latitude:35.214746, longitude:126.863094, is_transfer:false, open_date:'2029-12-01', address:'광주 광산구 쌍암동' },
+    { station_id:51, line_id:2, station_name:'광주우편',         district:'광산구', station_code:'L2-231', latitude:35.217805, longitude:126.849452, is_transfer:false, open_date:'2029-12-01', address:'광주 광산구 수완동' },
+    { station_id:52, line_id:2, station_name:'첨단 1,2동',     district:'광산구', station_code:'L2-232', latitude:35.217849, longitude:126.840679, is_transfer:false, open_date:'2029-12-01', address:'광주 광산구 흑석동' },
+    { station_id:53, line_id:2, station_name:'응암공원',         district:'광산구', station_code:'L2-233', latitude:35.216188, longitude:126.834099, is_transfer:false, open_date:'2029-12-01', address:'광주 광산구 운남동' },
+    { station_id:54, line_id:2, station_name:'수완지구',         district:'광산구', station_code:'L2-234', latitude:35.201703, longitude:126.819757, is_transfer:false, open_date:'2029-12-01', address:'광주 광산구 유촌동' },
+    { station_id:55, line_id:2, station_name:'수완지하차도', district:'광산구', station_code:'L2-235', latitude:35.189917, longitude:126.823846, is_transfer:false, open_date:'2029-12-01', address:'광주 광산구 운남동' },
+    { station_id:56, line_id:2, station_name:'운남지구',   district:'서구', station_code:'L2-236', latitude:35.180369, longitude:126.817690, is_transfer:false, open_date:'2029-12-01', address:'광주 서구 치평동' },
+    { station_id:57, line_id:2, station_name:'극락강역',   district:'서구', station_code:'L2-237', latitude:35.179491, longitude:126.824820, is_transfer:false, open_date:'2029-12-01', address:'광주 서구 치평동' },
+    { station_id:58, line_id:2, station_name:'하남',         district:'서구', station_code:'L2-238', latitude:35.174998, longitude:126.847958, is_transfer:false, open_date:'2029-12-01', address:'광주 서구 유덕동' },
+  ]
+};
+
+// ─────────────────────────────────────────
+//  상태
+// ─────────────────────────────────────────
+let kakaoMap;
+let kakaoMarkers = [];
+let currentLine     = 1;
+let selectedStation = null;
+let currentFilter   = '전체';
+let favorites       = new Set();
+let placeMarkers = [];
+let placeInfoWindow = null;
+let currentPlaces = [];
+let geocoder;
+let placesService;
+let selectedReviewPlace = null;
+
+function getReviews() {
+  return JSON.parse(localStorage.getItem('tourReviews')) || [];
+}
+function openWelcomeModal() {
+  if (!currentUser) return;
+
+  document.getElementById('welcomeTitle').textContent =
+    `${currentUser.name}님 환영합니다!`;
+
+  document.getElementById('welcomeModal').classList.add('show');
+}
+
+function closeWelcomeModal() {
+  document.getElementById('welcomeModal').classList.remove('show');
+}
+
+function goMyPageFromWelcome() {
+  closeWelcomeModal();
+  showMyPage();
+}
+
+function goFavoriteFromWelcome() {
+  closeWelcomeModal();
+  showMyFavorites();
+}
+function getReviewCount(placeId) {
+  const reviews = getReviews();
+  return reviews.filter(r => r.place_id === placeId).length;
+}
+function saveReviews(reviews) {
+  localStorage.setItem('tourReviews', JSON.stringify(reviews));
+}
+
+function openReviewModal(index) {
+  if (!currentUser) {
+    openAuthModal('login');
+    showToast('로그인 후 리뷰를 작성할 수 있어요.', 'error');
+    return;
+  }
+
+  selectedReviewPlace = currentPlaces[index];
+
+  document.getElementById('reviewPlaceTitle').textContent =
+    `${selectedReviewPlace.place_name} 리뷰`;
+
+  document.getElementById('reviewModal').classList.add('show');
+
+  renderReviews();
+}
+
+function closeReviewModal() {
+  document.getElementById('reviewModal').classList.remove('show');
+}
+
+function addReview() {
+  const score = Number(document.getElementById('reviewScore').value);
+  const text = document.getElementById('reviewText').value.trim();
+
+  if (!selectedReviewPlace) return;
+
+  if (score < 1 || score > 5 || !text) {
+    alert('평점은 1~5점, 리뷰 내용은 필수입니다.');
+    return;
+  }
+
+  const reviews = getReviews();
+
+  reviews.push({
+    id: Date.now(),
+    place_id: selectedReviewPlace.place_id,
+    place_name: selectedReviewPlace.place_name,
+    user_id: currentUser.id,
+    user_name: currentUser.name,
+    score,
+    text,
+    created_at: new Date().toLocaleString()
+  });
+
+  saveReviews(reviews);
+
+  document.getElementById('reviewScore').value = '';
+  document.getElementById('reviewText').value = '';
+
+  renderReviews();
+
+if (currentPlaces.length > 0) {
+  renderPlaces(currentPlaces);
+}
+}
+function renderReviews() {
+  const box = document.getElementById('reviewList');
+  const reviews = getReviews().filter(review =>
+    review.place_id === selectedReviewPlace.place_id
+  );
+
+  if (reviews.length === 0) {
+    box.innerHTML = `<div class="mypage-item">아직 작성된 리뷰가 없습니다.</div>`;
+    return;
+  }
+
+  box.innerHTML = reviews.map(review => `
+    <div class="mypage-item">
+      <b>${review.user_name}</b> · ⭐ ${review.score}/5<br>
+      ${review.text}<br>
+      <small style="color:var(--gray4);">${review.created_at}</small>
+      ${
+        currentUser && review.user_id === currentUser.id
+          ? `<br><button onclick="deleteReview(${review.id})"
+              style="margin-top:8px;border:none;background:#eee;padding:6px 10px;border-radius:8px;cursor:pointer;">
+              삭제
+            </button>`
+          : ''
+      }
+    </div>
+  `).join('');
+}
+
+function deleteReview(id) {
+  let reviews = getReviews();
+
+  reviews = reviews.filter(review => review.id !== id);
+
+  saveReviews(reviews);
+  renderReviews();
+
+if (currentPlaces.length > 0) {
+  renderPlaces(currentPlaces);
+}
+}
+let currentUser = JSON.parse(localStorage.getItem('tourCurrentUser')) || null;
+let authMode = 'login';
+
+function saveUsers(users) {
+  localStorage.setItem('tourUsers', JSON.stringify(users));
+}
+
+function getUsers() {
+  return JSON.parse(localStorage.getItem('tourUsers')) || [];
+}
+
+function openAuthModal(mode = 'login') {
+  authMode = mode;
+  document.getElementById('authModal').classList.add('show');
+  updateAuthModal();
+}
+
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('show');
+}
+
+function updateAuthModal() {
+  const isLogin = authMode === 'login';
+
+  document.getElementById('authTitle').textContent = isLogin ? '로그인' : '회원가입';
+  document.getElementById('authDesc').textContent = isLogin
+    ? '로그인하고 즐겨찾기를 저장하세요.'
+    : '간단한 정보로 회원가입하세요.';
+
+  document.getElementById('authName').style.display = isLogin ? 'none' : 'block';
+  document.querySelector('.auth-btn').textContent = isLogin ? '로그인' : '회원가입';
+  document.getElementById('authSwitchText').textContent = isLogin ? '회원가입하기' : '로그인하기';
+}
+function submitAuth() {
+  const id = document.getElementById('authId').value.trim();
+  const pw = document.getElementById('authPw').value.trim();
+  const name = document.getElementById('authName').value.trim();
+  if (!id || !pw) {
+    alert('아이디와 비밀번호를 입력하세요.');
+    return;
+  }
+
+  let users = getUsers();
+
+  if (authMode === 'signup') {
+    if (!name) {
+      alert('이름을 입력하세요.');
+      return;
+    }
+
+    if (users.some(user => user.id === id)) {
+      alert('이미 존재하는 아이디입니다.');
+      return;
+    }
+
+    const newUser = {
+  id,
+  pw,
+  name,
+  favorites: [],
+  recommends: []
+};
+
+    users.push(newUser);
+    saveUsers(users);
+
+    alert('회원가입 완료! 로그인해주세요.');
+    authMode = 'login';
+    updateAuthModal();
+    return;
+  }
+
+  const user = users.find(user => user.id === id && user.pw === pw);
+
+  if (!user) {
+  const errorBox = document.getElementById('loginError');
+  const modal = document.querySelector('.auth-modal');
+
+  errorBox.style.display = 'block';
+
+  modal.classList.add('shake');
+  setTimeout(() => {
+    modal.classList.remove('shake');
+  }, 350);
+
+  document.getElementById('authPw').value = '';
+  document.getElementById('authPw').focus();
+
+  return;
+}
+
+  currentUser = user;
+  localStorage.setItem('tourCurrentUser', JSON.stringify(currentUser));
+  document.getElementById('loginError').style.display = 'none';
+
+  favorites = new Set(currentUser.favorites || []);
+
+  closeAuthModal();
+updateLoginUI();
+openWelcomeModal();
+
+if (currentPlaces.length > 0) {
+  renderPlaces(currentPlaces);
+}
+}
+function updateLoginUI() {
+  const btn = document.getElementById('loginBtn');
+
+  if (currentUser) {
+    btn.textContent = `${currentUser.name}님`;
+    btn.onclick = showMyPage;
+  } else {
+    btn.textContent = '로그인';
+    btn.onclick = () => openAuthModal('login');
+  }
+}
+
+function logout() {
+  currentUser = null;
+  favorites = new Set();
+
+  localStorage.removeItem('tourCurrentUser');
+
+  closeMyPage();
+
+  const favoriteModal = document.getElementById('favoriteModal');
+  if (favoriteModal) favoriteModal.classList.remove('show');
+
+  const reviewModal = document.getElementById('reviewModal');
+  if (reviewModal) reviewModal.classList.remove('show');
+
+  updateLoginUI();
+  showToast('로그아웃되었습니다.');
+
+  if (currentPlaces.length > 0) {
+    renderPlaces(currentPlaces);
+  }
+}
+// ─────────────────────────────────────────
+//  API fetch 헬퍼
+// ─────────────────────────────────────────
+async function apiFetch(path) {
+  try {
+
+    const res = await fetch(API_BASE + path);
+
+    const data = await res.json();
+
+    return data;
+
+  } catch (err) {
+
+    console.error('API 오류:', err);
+
+    showToast('데이터를 불러오지 못했습니다', 'error');
+
+    return null;
+  }
+}
+
+// ─────────────────────────────────────────
+//  토스트 알림
+// ─────────────────────────────────────────
+function showToast(msg, type = 'info') {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:${type === 'error' ? '#e74c3c' : '#2ecc71'};
+    color:white;padding:10px 20px;border-radius:20px;
+    font-size:13px;font-weight:600;z-index:9999;
+    box-shadow:0 4px 16px rgba(0,0,0,.2);
+  `;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ─────────────────────────────────────────
+//  카카오맵 초기화
+// ─────────────────────────────────────────
+function initKakaoMap() {
+  
+  const mapContainer = document.getElementById('kakaoMap');
+  if (typeof kakao === 'undefined' || !kakao.maps) {
+    console.error('카카오맵 SDK 로드 실패');
+    return;
+  }
+
+  const mapOption = {
+    center: new kakao.maps.LatLng(35.1595, 126.8526),
+    level: 6
+  };
+  kakaoMap = new kakao.maps.Map(mapContainer, mapOption);
+geocoder = new kakao.maps.services.Geocoder();
+placesService = new kakao.maps.services.Places();
+drawKakaoMarkers(currentLine);
+}
+ 
+// ─────────────────────────────────────────
+//  카카오맵 마커 그리기 (좌표 데이터 사용)
+// ─────────────────────────────────────────
+function drawKakaoMarkers(lineId) {
+  if (!kakaoMap) return;
+  kakaoMarkers.forEach(m => m.setMap(null));
+  kakaoMarkers = [];
+
+  const stations = STATIONS[lineId] || [];
+
+  stations.forEach(station => {
+    const position = new kakao.maps.LatLng(station.latitude, station.longitude);
+    const marker   = new kakao.maps.Marker({ position, map: kakaoMap });
+
+    const infoWindow = new kakao.maps.InfoWindow({
+      content: `<div style="padding:6px 10px;font-size:13px;font-weight:700;white-space:nowrap;">${station.station_name}역</div>`
+    });
+
+    kakao.maps.event.addListener(marker, 'mouseover', () => infoWindow.open(kakaoMap, marker));
+    kakao.maps.event.addListener(marker, 'mouseout',  () => infoWindow.close());
+    kakao.maps.event.addListener(marker, 'click',     () => selectStation(station.station_id));
+
+    kakaoMarkers.push(marker);
+  });
+}
+
+
+// ─────────────────────────────────────────
+//  노선 탭 전환
+// ─────────────────────────────────────────
+function switchLine(lineNum) {
+  currentLine     = lineNum;
+  selectedStation = null;
+  currentFilter   = '전체';
+
+  document.querySelectorAll('.line-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === lineNum - 1);
+  });
+  document.querySelectorAll('.filter-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === 0);
+  });
+
+  renderSidebar();
+  resetPanel();
+  drawKakaoMarkers(lineNum);
+}
+
+// ─────────────────────────────────────────
+//  사이드바 렌더링 (STATIONS 데이터 사용)
+// ─────────────────────────────────────────
+function renderSidebar() {
+  const stations = STATIONS[currentLine] || [];
+  const color    = currentLine === 1 ? '#00B5A2' : '#0052A4';
+  const cls2     = currentLine === 2 ? 'line2' : '';
+
+  document.getElementById('stationList').innerHTML = stations.map((s, i) => `
+    <div class="station-item ${cls2} ${selectedStation?.station_id === s.station_id ? 'active' : ''}"
+         onclick="selectStation(${s.station_id})" id="si-${s.station_id}">
+      <div class="dot-wrap">
+        ${i > 0 ? `<div class="line-seg ${cls2}" style="background:${color}"></div>` : ''}
+        <div class="station-dot ${cls2} ${s.is_transfer ? 'transfer' : ''}"></div>
+        ${i < stations.length - 1 ? `<div class="line-seg ${cls2}" style="background:${color}"></div>` : ''}
+      </div>
+      <div class="station-info">
+        <div class="station-name-label">
+          ${s.station_name}
+          ${s.is_transfer ? '<span class="transfer-badge">환승</span>' : ''}
+        </div>
+        <div class="district-label">${s.district} · ${s.station_code}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────
+//  역 선택 → 카카오맵 이동 + API로 장소 불러오기
+// ─────────────────────────────────────────
+async function selectStation(stationId) {
+  // STATIONS에서 역 정보 찾기
+  const allStations = [...(STATIONS[1] || []), ...(STATIONS[2] || [])];
+  const s = allStations.find(st => st.station_id === stationId);
+  if (!s) return;
+
+  // 노선 탭 동기화
+  if (s.line_id !== currentLine) {
+    currentLine = s.line_id;
+    document.querySelectorAll('.line-tab').forEach((t, i) => {
+      t.classList.toggle('active', i === currentLine - 1);
+    });
+    renderSidebar();
+    drawKakaoMarkers(currentLine);
+  }
+
+  selectedStation = s;
+
+  // 카카오맵 중심 이동
+  if (kakaoMap) {
+    kakaoMap.setCenter(new kakao.maps.LatLng(s.latitude, s.longitude));
+    kakaoMap.setLevel(4);
+  }
+
+  // 사이드바 active 갱신
+  document.querySelectorAll('.station-item').forEach(el => el.classList.remove('active'));
+  const si = document.getElementById('si-' + stationId);
+  if (si) {
+    si.classList.add('active');
+    si.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // 헤더 갱신
+  document.getElementById('mapLocIcon').textContent = `🚇 ${currentLine}호선`;
+  document.getElementById('mapStationName').textContent = s.station_name + '역';
+  document.getElementById('mapStationDesc').textContent = `${s.district} · 주변 맛집 & 관광 정보 로딩 중...`;
+
+  // 역 정보 카드 갱신
+  renderStationCard();
+
+  // API로 장소 불러오기
+  await loadPlaces();
+}
+
+// ─────────────────────────────────────────
+//  장소 목록 API 로드
+// ─────────────────────────────────────────
+async function loadPlaces() {
+  if (!selectedStation) return;
+
+  const s    = selectedStation;
+  const list = document.getElementById('placeList');
+
+  list.innerHTML = `
+    <div class="empty-state">
+      <div class="emoji">⏳</div>
+      <p>장소 정보를 불러오는 중...</p>
+    </div>`;
+
+  const lineName = currentLine === 1 ? '1호선' : '2호선';
+  let url = `/places?station_name=${encodeURIComponent(s.station_name)}&line_name=${encodeURIComponent(lineName)}`;
+  if (currentFilter !== '전체') url += `&category=${encodeURIComponent(currentFilter)}`;
+
+  const data = await apiFetch(url);
+  console.log('API 요청 주소:', url);
+console.log('API에서 받은 맛집 데이터:', data);
+
+document.getElementById('mapStationDesc').textContent =
+`${s.district} · 주변 맛집 정보`;
+
+if (!data) return;
+
+renderPlaces(data);
+drawPlaceMarkers(data);
+console.log('받은 데이터:', data);
+
+  }
+// ─────────────────────────────────────────
+//  장소 카드 렌더링
+// ─────────────────────────────────────────
+function getPlaceEmoji(category, placeType) {
+  const text = `${category || ''} ${placeType || ''}`;
+  if (text.includes('카페') || text.includes('디저트') || text.includes('베이커리')) return '☕';
+  if (text.includes('주점') || text.includes('술') || text.includes('포차') || text.includes('맥주') || text.includes('이자카야')) return '🍺';
+  if (text.includes('일식') || text.includes('초밥') || text.includes('스시') || text.includes('라멘')) return '🍣';
+  if (text.includes('중식') || text.includes('마라') || text.includes('짬뽕') || text.includes('양꼬치')) return '🥢';
+  if (text.includes('고기') || text.includes('갈비') || text.includes('삼겹') || text.includes('한우')) return '🥩';
+  if (text.includes('한식') || text.includes('국밥') || text.includes('백반')) return '🍚';
+  return '🍽️';
+}
+
+function getPlaceMarkerImage(category, placeType) {
+  const emoji = getPlaceEmoji(category, placeType);
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="52" viewBox="0 0 44 52">
+      <filter id="shadow">
+        <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.25"/>
+      </filter>
+      <path filter="url(#shadow)"
+        d="M22 50 C22 50 5 32 5 20 C5 9 12.5 3 22 3 C31.5 3 39 9 39 20 C39 32 22 50 22 50 Z"
+        fill="#ffffff"/>
+      <circle cx="22" cy="20" r="15" fill="#00B5A2"/>
+      <text x="22" y="26" font-size="18" text-anchor="middle" font-family="Arial, sans-serif">${emoji}</text>
+    </svg>
+  `;
+
+  return new kakao.maps.MarkerImage(
+    'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    new kakao.maps.Size(44, 52),
+    { offset: new kakao.maps.Point(22, 50) }
+  );
+}
+
+function clearPlaceMarkers() {
+  placeMarkers.forEach(marker => marker.setMap(null));
+  placeMarkers = [];
+
+  if (placeInfoWindow) {
+    placeInfoWindow.close();
+    placeInfoWindow = null;
+  }
+}
+
+function openNaverMap(place) {
+  if (!place || !place.place_name) {
+    alert('가게 정보가 없습니다.');
+    return;
+  }
+
+  const keyword = `${place.place_name} ${place.address || '광주'}`;
+  const url = `https://map.naver.com/p/search/${encodeURIComponent(keyword)}`;
+
+  window.open(url, '_blank');
+}
+
+function openNaverFromCurrentPlaces(index) {
+  const place = currentPlaces[index];
+  if (!place) return;
+
+  openNaverMap(place);
+}
+
+function handlePlaceCardClick(index) {
+  const place = currentPlaces[index];
+  if (!place) return;
+
+  openNaverMap(place);
+}
+
+function drawPlaceMarkers(places) {
+  clearPlaceMarkers();
+
+  if (!kakaoMap || !places || places.length === 0) return;
+
+  currentPlaces = places.slice(0, 20);
+
+  currentPlaces.forEach((place, index) => {
+    const addMarker = (position) => {
+      const marker = new kakao.maps.Marker({
+        map: kakaoMap,
+        position: position,
+        image: getPlaceMarkerImage(place.category, place.place_type)
+      });
+
+      placeMarkers.push(marker);
+    };
+
+    if (place.place_name && placesService && selectedStation) {
+      const keyword = `${place.place_name} 광주`;
+
+      placesService.keywordSearch(keyword, function(result, status) {
+        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+          addMarker(new kakao.maps.LatLng(result[0].y, result[0].x));
+        } else {
+          console.log('카카오 검색 실패:', keyword, status);
+        }
+      });
+    }
+  });
+}
+function getDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+function renderPlaces(places) {
+  const list = document.getElementById('placeList');
+  currentPlaces = places.slice(0, 20);
+
+  document.getElementById('panelTitle').textContent =
+    `${selectedStation.station_name}역 주변 ${currentFilter === '전체' ? '데이트 장소' : currentFilter} ${places.length}곳`;
+
+  if (places.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">🔍</div>
+        <p>해당 카테고리의 정보가 없어요.<br>다른 카테고리를 선택해 보세요!</p>
+      </div>`;
+    return;
+  }
+
+  const rankColors = ['#00B5A2','#5b8def','#f0a500','#C4C9D4','#C4C9D4'];
+  const emojiMap = { '한식':'🍚','카페':'☕','중식':'🥢','일식':'🍣','디저트':'🍰','관광지':'🗺️','문화시설':'🏛️','핫플':'✨','베이커리':'🥐','분식':'🍜','횟집':'🐟','갈비':'🥩' };
+
+  list.innerHTML = places.slice(0, 20).map((p, i) => {
+    const emoji = Object.entries(emojiMap).find(([k]) => (p.category || '').includes(k))?.[1] || '🍽️';
+    const badgeClass = (p.place_type || '').includes('카페') ? '카페'
+      : (p.category || '').includes('한식') ? '한식'
+      : (p.category || '').includes('중식') ? '중식'
+      : (p.category || '').includes('일식') ? '일식'
+      : (p.category || '').includes('디저트') ? '디저트'
+      : '핫플';
+
+    return `
+      <div class="place-card" onclick="handlePlaceCardClick(${i})">
+        <div class="place-rank" style="background:${rankColors[i] || '#C4C9D4'}">${i + 1}</div>
+        <div class="place-img">${p.image_url ? `<img src="${p.image_url}" alt="${p.place_name || ''}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : emoji}</div>
+        <div class="place-body">
+          <div style="display:flex;gap:4px;align-items:center;margin-bottom:3px;">
+            <span class="cat-badge ${badgeClass}">${p.category || '기타'}</span>
+            <span style="font-size:10px;color:var(--gray4);">${p.place_type || ''}</span>
+          </div>
+          <div class="place-title">${p.place_name}</div>
+          <div class="place-stars">
+            ${'★'.repeat(p.date_score || 3)}${'☆'.repeat(5 - (p.date_score || 3))}
+            <span style="font-size:10px;color:var(--gray4);margin-left:4px;">데이트점수 ${p.date_score || '-'}/5</span>
+          </div>
+          <div class="place-desc">${p.address || ''}</div>
+          <div class="place-meta">
+            📞 ${p.phone || '정보없음'}
+            ${p.source_grade ? `&nbsp;·&nbsp;🏆 ${p.source_grade}` : ''}
+          </div>
+        </div>
+        <button class="review-btn"
+onclick="event.stopPropagation();openReviewModal(${i})">
+  💬 ${getReviewCount(p.place_id)}
+</button>
+</button>
+        <button class="place-fav" onclick="event.stopPropagation();toggleFav(${p.place_id},this)">
+          ${favorites.has(p.place_id) ? '❤️' : '🤍'}
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─────────────────────────────────────────
+//  역 정보 카드
+// ─────────────────────────────────────────
+function renderStationCard() {
+  const s   = selectedStation;
+  const cls = currentLine === 2 ? 'line2' : '';
+  document.getElementById('stationDetailCard').innerHTML = `
+    <div class="station-detail-card ${cls}">
+      <div class="line-badge">${currentLine}호선</div>
+      <h3>${s.station_name}역</h3>
+      <div class="detail-row">
+        <span>📍 ${s.district}</span>
+        <span>🔢 ${s.station_code}</span>
+        ${s.is_transfer ? '<span>🔄 환승역</span>' : ''}
+        <span>📅 ${s.open_date?.slice(0,4)}년 개통</span>
+      </div>
+      <div style="margin-top:6px;font-size:10px;opacity:.75;">${s.address}</div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────
+//  필터
+// ─────────────────────────────────────────
+async function filterPlaces(cat) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    const label = b.textContent.trim().replace(/^[\S]+\s*/, '').trim();
+    b.classList.toggle('active', b.textContent.trim() === cat || label === cat);
+  });
+  await loadPlaces();
+}
+
+// ─────────────────────────────────────────
+//  즐겨찾기
+// ─────────────────────────────────────────
+function toggleFav(id, btn) {
+  if (!currentUser) {
+    openAuthModal('login');
+    showToast('로그인 후 즐겨찾기를 사용할 수 있어요.', 'error');
+    return;
+  }
+
+  if (favorites.has(id)) {
+    favorites.delete(id);
+    btn.textContent = '🤍';
+  } else {
+    favorites.add(id);
+    btn.textContent = '❤️';
+  }
+
+  const users = getUsers();
+  const userIndex = users.findIndex(user => user.id === currentUser.id);
+
+  if (userIndex !== -1) {
+    users[userIndex].favorites = Array.from(favorites);
+    currentUser.favorites = Array.from(favorites);
+
+    saveUsers(users);
+    localStorage.setItem('tourCurrentUser', JSON.stringify(currentUser));
+  }
+}
+function showMyPage() {
+  if (!currentUser) {
+    openAuthModal('login');
+    return;
+  }
+
+  document.getElementById('myPageModal').classList.add('show');
+  renderMyPage();
+}
+function renderMyFavorites() {
+  const box = document.getElementById('myFavoriteList');
+
+  if (!currentUser.favorites || currentUser.favorites.length === 0) {
+    box.innerHTML = `<div class="mypage-item">아직 즐겨찾기한 장소가 없습니다.</div>`;
+    return;
+  }
+
+  const favPlaces = currentPlaces.filter(place =>
+    currentUser.favorites.includes(place.place_id)
+  );
+
+  if (favPlaces.length === 0) {
+    box.innerHTML = `
+      <div class="mypage-item">
+        즐겨찾기 ${currentUser.favorites.length}개가 저장되어 있습니다.<br>
+        해당 역을 다시 선택하면 목록에 보일 수 있어요.
+      </div>
+    `;
+    return;
+  }
+
+  box.innerHTML = favPlaces.map(place => `
+    <div class="mypage-item">
+      <b>${place.place_name}</b><br>
+      ${place.category || ''} · ${place.address || ''}
+    </div>
+  `).join('');
+}
+function addMyRecommend() {
+  const name = document.getElementById('recommendName').value.trim();
+  const address = document.getElementById('recommendAddress').value.trim();
+  const memo = document.getElementById('recommendMemo').value.trim();
+
+  if (!name || !address || !memo) {
+    alert('맛집 이름, 위치, 추천 이유를 모두 입력하세요.');
+    return;
+  }
+
+  const users = getUsers();
+  const userIndex = users.findIndex(user => user.id === currentUser.id);
+
+  if (!currentUser.recommends) {
+    currentUser.recommends = [];
+  }
+
+  const newRecommend = {
+    id: Date.now(),
+    name,
+    address,
+    memo
+  };
+
+  currentUser.recommends.push(newRecommend);
+
+  if (userIndex !== -1) {
+    users[userIndex] = currentUser;
+    saveUsers(users);
+  }
+
+  localStorage.setItem('tourCurrentUser', JSON.stringify(currentUser));
+
+  document.getElementById('recommendName').value = '';
+  document.getElementById('recommendAddress').value = '';
+  document.getElementById('recommendMemo').value = '';
+
+  renderMyRecommends();
+  showToast('추천 맛집이 저장되었습니다.');
+}
+
+function renderMyRecommends() {
+  const box = document.getElementById('myRecommendList');
+
+  if (!currentUser.recommends || currentUser.recommends.length === 0) {
+    box.innerHTML = `<div class="mypage-item">아직 추천한 맛집이 없습니다.</div>`;
+    return;
+  }
+
+  box.innerHTML = currentUser.recommends.map(item => `
+    <div class="mypage-item">
+      <b>${item.name}</b><br>
+      📍 ${item.address}<br>
+      💬 ${item.memo}<br>
+      <button onclick="deleteMyRecommend(${item.id})"
+        style="margin-top:8px;border:none;background:#eee;padding:6px 10px;border-radius:8px;cursor:pointer;">
+        삭제
+      </button>
+    </div>
+  `).join('');
+}
+
+function deleteMyRecommend(id) {
+  currentUser.recommends = currentUser.recommends.filter(item => item.id !== id);
+
+  const users = getUsers();
+  const userIndex = users.findIndex(user => user.id === currentUser.id);
+
+  if (userIndex !== -1) {
+    users[userIndex] = currentUser;
+    saveUsers(users);
+  }
+
+  localStorage.setItem('tourCurrentUser', JSON.stringify(currentUser));
+  renderMyRecommends();
+}
+function deleteAccount() {
+  if (!confirm('정말 회원탈퇴 하시겠습니까? 저장된 즐겨찾기와 추천 맛집이 모두 삭제됩니다.')) {
+    return;
+  }
+
+  let users = getUsers();
+  users = users.filter(user => user.id !== currentUser.id);
+
+  saveUsers(users);
+  localStorage.removeItem('tourCurrentUser');
+
+  currentUser = null;
+  favorites = new Set();
+
+  closeMyPage();
+  updateLoginUI();
+
+  showToast('회원탈퇴가 완료되었습니다.');
+}
+function closeMyPage() {
+  document.getElementById('myPageModal').classList.remove('show');
+}
+
+function renderMyPage() {
+  document.getElementById('myPageUserInfo').textContent =
+    `${currentUser.name}님 환영합니다. 아이디: ${currentUser.id}`;
+
+  renderMyFavorites();
+  renderMyRecommends();
+}
+
+function showMyFavorites() {
+  if (!currentUser) {
+    openAuthModal('login');
+    showToast('로그인 후 즐겨찾기를 볼 수 있어요.', 'error');
+    return;
+  }
+
+  document.getElementById('favoriteModal').classList.add('show');
+  renderFavoritePopup();
+}
+
+function closeFavoriteModal() {
+  document.getElementById('favoriteModal').classList.remove('show');
+}
+
+function renderFavoritePopup() {
+  const box = document.getElementById('favoritePopupList');
+
+  if (!currentUser.favorites || currentUser.favorites.length === 0) {
+    box.innerHTML = `
+      <div class="mypage-item">
+        아직 즐겨찾기한 맛집이 없습니다.
+      </div>
+    `;
+    return;
+  }
+
+  const favPlaces = currentPlaces.filter(place =>
+    currentUser.favorites.includes(place.place_id)
+  );
+
+  if (favPlaces.length === 0) {
+    box.innerHTML = `
+      <div class="mypage-item">
+        즐겨찾기는 저장되어 있지만 현재 선택한 역 목록에는 없습니다.<br>
+        즐겨찾기한 맛집이 있는 역을 다시 선택하면 표시됩니다.
+      </div>
+    `;
+    return;
+  }
+
+  box.innerHTML = favPlaces.map(place => `
+    <div class="mypage-item">
+      <b>${place.place_name}</b><br>
+      ${place.category || ''} · ${place.place_type || ''}<br>
+      📍 ${place.address || '주소 정보 없음'}<br>
+      📞 ${place.phone || '전화번호 없음'}
+      <br>
+      <button onclick="openNaverMapByFavorite('${place.place_name}', '${place.address || ''}')"
+        style="margin-top:8px;border:none;background:var(--line1);color:white;padding:7px 10px;border-radius:8px;cursor:pointer;">
+        네이버지도에서 보기
+      </button>
+    </div>
+  `).join('');
+}
+
+function openNaverMapByFavorite(name, address) {
+  const keyword = `${name} ${address || '광주'}`;
+  const url = `https://map.naver.com/p/search/${encodeURIComponent(keyword)}`;
+  window.open(url, '_blank');
+}
+// ─────────────────────────────────────────
+//  패널 초기화
+// ─────────────────────────────────────────
+function resetPanel() {
+  document.getElementById('stationDetailCard').innerHTML = '';
+  document.getElementById('panelTitle').textContent = '역 주변 맛집 & 관광';
+  document.getElementById('placeList').innerHTML = `
+    <div class="empty-state">
+      <div class="emoji">🗺️</div>
+      <p>왼쪽 노선도에서 역을 선택하면<br>주변 맛집 및 관광 정보를 확인할 수 있어요!</p>
+    </div>`;
+  document.getElementById('mapStationName').textContent = '역을 선택해 주세요';
+  document.getElementById('mapStationDesc').textContent = '역을 클릭하면 주변 맛집·관광 정보를 확인할 수 있어요';
+  document.getElementById('mapLocIcon').textContent = '🚇 노선도';
+}
+
+function showDetail() {
+  if (!selectedStation) { alert('역을 먼저 선택해 주세요.'); return; }
+  const s = selectedStation;
+  alert(`${s.station_name}역\n코드: ${s.station_code}\n주소: ${s.address}\n개통일: ${s.open_date}${s.is_transfer ? '\n환승역' : ''}`);
+}
+
+
+
+/* ===== tour_gwangju_1.html에서 통합한 홈/추천코스/핫플 JS ===== */
+/* ── 홈 모달 ── */
+function setActiveNav(labelText) {
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.classList.toggle('active', a.textContent.trim() === labelText);
+  });
+}
+
+function openHomeModal() {
+  const overlay = document.getElementById('homeOverlay');
+  const layout = document.querySelector('.layout');
+  if (layout) layout.style.display = 'none';
+  if (overlay) overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setActiveNav('홈');
+}
+
+function showStationExplore() {
+  const homeOverlay = document.getElementById('homeOverlay');
+  const courseOverlay = document.getElementById('courseOverlay');
+  const hotplaceOverlay = document.getElementById('hotplaceOverlay');
+  const layout = document.querySelector('.layout');
+
+  if (homeOverlay) homeOverlay.classList.remove('open');
+  if (courseOverlay) courseOverlay.classList.remove('open');
+  if (hotplaceOverlay) hotplaceOverlay.classList.remove('open');
+  if (layout) layout.style.display = 'flex';
+
+  document.body.style.overflow = '';
+  setActiveNav('역별 탐색');
+
+  // 숨겨져 있던 화면을 보여준 뒤 카카오맵 크기를 다시 계산합니다.
+  setTimeout(() => {
+    if (typeof kakao !== 'undefined' && kakao.maps && typeof kakaoMap !== 'undefined' && kakaoMap) {
+      kakaoMap.relayout();
+      if (selectedStation && selectedStation.lat && selectedStation.lng) {
+        kakaoMap.setCenter(new kakao.maps.LatLng(selectedStation.lat, selectedStation.lng));
+      } else {
+        kakaoMap.setCenter(new kakao.maps.LatLng(35.1595, 126.8526));
+      }
+    }
+  }, 150);
+}
+
+// 기존 코드 호환용: closeHomeModal()을 호출해도 역별 탐색으로 이동하게 유지
+function closeHomeModal() {
+  showStationExplore();
+}
+// 오버레이 배경 클릭 시 닫기
+document.getElementById('homeOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeHomeModal();
+});
+// ESC 키로 닫기
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeHomeModal();
+});
+
+
+const hp = {
+  allPlaces: [],       // API에서 받아온 전체 데이터
+  filtered: [],        // 현재 필터/검색 후 결과
+  category: '전체',
+  sort: 'score',       // 'score' | 'name'
+  district: '전체',
+  stationFilter: '전체',
+  keyword: '',
+  pendingKeyword: '',
+  page: 1,
+  perPage: 20,
+  viewMode: 'grid',    // 'grid' | 'list'
+  loaded: false,
+};
+
+const EMOJI_MAP = {
+  '한식':'🍚','카페':'☕','중식':'🥢','일식':'🍣','디저트':'🍰',
+  '관광지':'🗺️','문화시설':'🏛️','핫플':'✨','베이커리':'🥐',
+  '분식':'🍜','횟집':'🐟','갈비':'🥩','치킨':'🍗','피자':'🍕'
+};
+
+// 배경색 팔레트 (썸네일용)
+const THUMB_COLORS = [
+  'linear-gradient(135deg,#e8faf8,#c5f2ed)',
+  'linear-gradient(135deg,#e6eef8,#c0d4f0)',
+  'linear-gradient(135deg,#fff0f0,#fdd)',
+  'linear-gradient(135deg,#fff8e1,#fde8b0)',
+  'linear-gradient(135deg,#f3e5f5,#e0b8f0)',
+  'linear-gradient(135deg,#e8f5e9,#b8e8bf)',
+  'linear-gradient(135deg,#fce4ec,#f8bbd0)',
+  'linear-gradient(135deg,#e0f7fa,#b2ebf2)',
+];
+
+/* ── 모달 열기/닫기 ── */
+async function openHotplaceModal() {
+  const overlay = document.getElementById('hotplaceOverlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!hp.loaded) await loadAllHotplaces();
+}
+function closeHotplaceModal() {
+  document.getElementById('hotplaceOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('hotplaceOverlay').addEventListener('click', function(e) {
+  // 클릭이 overlay 배경 자체일 때만 닫기 (내부 클릭 방지)
+  // 전체화면이라 배경 클릭 닫기는 제거
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeHotplaceModal();
+    closeHomeModal();
+  }
+});
+
+/* ── 전체 데이터 로드 ── */
+async function loadAllHotplaces() {
+  showHpSkeleton();
+  try {
+    const res = await fetch(API_BASE + '/places/all');
+    const data = await res.json();
+    if (data.success && Array.isArray(data.places)) {
+      hp.allPlaces = data.places;
+    } else {
+      // 백엔드 미연결 시 데모 데이터 사용
+      hp.allPlaces = generateDemoPlaces();
+    }
+  } catch {
+    hp.allPlaces = generateDemoPlaces();
+  }
+  hp.loaded = true;
+  buildDistrictSidebar();
+  applyHpFilters();
+}
+
+/* ── 데모 데이터 (백엔드 없을 때) ── */
+function generateDemoPlaces() {
+  const allSt = [...(STATIONS[1] || []), ...(STATIONS[2] || [])];
+  const cats = ['한식','카페','일식','중식','디저트','관광지','문화시설','핫플'];
+  const names = {
+    '한식':  ['남도한정식','광주비빔밥','돌솥밥집','참맛식당','무등산보리밥'],
+    '카페':  ['무등산커피','동명동카페','카페봄날','커피로드','양림카페'],
+    '일식':  ['사시미마루','초밥장인','라멘집합','오마카세광주','돈까스본가'],
+    '중식':  ['홍콩반점','짜장면명가','중화루','팔도반점','북경오리'],
+    '디저트':['송정빵집','케이크공방','마카롱마루','빙수천국','아이스크림파크'],
+    '관광지':['국립아시아문화전당','무등산','양림역사마을','5·18민주화운동기록관','광주공원'],
+    '문화시설':['광주시립미술관','국립광주박물관','광주극장','빛고을시민문화관','광주문화재단'],
+    '핫플':  ['동명동카페거리','1913송정역시장','양동시장','충장로거리','금남로공원'],
+  };
+  const demos = [];
+  let id = 1;
+  allSt.forEach(st => {
+    const count = Math.floor(Math.random() * 4) + 2;
+    for (let i = 0; i < count; i++) {
+      const cat = cats[Math.floor(Math.random() * cats.length)];
+      const nameList = names[cat];
+      const baseName = nameList[Math.floor(Math.random() * nameList.length)];
+      demos.push({
+        place_id: id++,
+        place_name: baseName,
+        category: cat,
+        place_type: cat,
+        station_name: st.station_name,
+        district: st.district,
+        address: st.address,
+        date_score: Math.floor(Math.random() * 3) + 3,
+        phone: `062-${Math.floor(Math.random()*900)+100}-${Math.floor(Math.random()*9000)+1000}`,
+        source_grade: Math.random() > .6 ? ['미슐랭','블루리본','맛집선정'][Math.floor(Math.random()*3)] : null,
+      });
+    }
+  });
+  return demos;
+}
+
+/* ── 구/역 사이드바 생성 ── */
+function buildDistrictSidebar() {
+  const districts = ['전체', ...new Set(hp.allPlaces.map(p => p.district).filter(Boolean))].sort((a,b) => a==='전체'?-1:1);
+  const distEl = document.getElementById('hpDistrictList');
+  distEl.innerHTML = districts.map(d => {
+    const cnt = d === '전체' ? hp.allPlaces.length : hp.allPlaces.filter(p => p.district === d).length;
+    return `<div class="hp-side-item ${d === hp.district ? 'active' : ''}" onclick="setHpDistrict('${d}')">
+      <span>${d}</span><span class="side-count">${cnt}</span>
+    </div>`;
+  }).join('');
+
+  buildStationSidebar();
+}
+
+function buildStationSidebar() {
+  const base = hp.district === '전체' ? hp.allPlaces : hp.allPlaces.filter(p => p.district === hp.district);
+  const stationCounts = {};
+  base.forEach(p => { if (p.station_name) stationCounts[p.station_name] = (stationCounts[p.station_name]||0)+1; });
+  const stations = Object.entries(stationCounts).sort((a,b) => b[1]-a[1]);
+
+  const el = document.getElementById('hpStationFilterList');
+  el.innerHTML = `
+    <div class="hp-side-item ${hp.stationFilter==='전체'?'active':''}" onclick="setHpStation('전체')">
+      <span>전체 역</span><span class="side-count">${base.length}</span>
+    </div>
+    ${stations.map(([name, cnt]) => `
+      <div class="hp-side-item ${hp.stationFilter===name?'active':''}" onclick="setHpStation('${name}')">
+        <span>🚇 ${name}</span><span class="side-count">${cnt}</span>
+      </div>`).join('')}`;
+}
+
+/* ── 필터 적용 ── */
+function applyHpFilters() {
+  let list = [...hp.allPlaces];
+
+  // 카테고리
+  if (hp.category !== '전체') list = list.filter(p => (p.category||'').includes(hp.category) || (p.place_type||'').includes(hp.category));
+  // 구
+  if (hp.district !== '전체') list = list.filter(p => p.district === hp.district);
+  // 역
+  if (hp.stationFilter !== '전체') list = list.filter(p => p.station_name === hp.stationFilter);
+  // 키워드
+  if (hp.keyword) {
+    const kw = hp.keyword.toLowerCase();
+    list = list.filter(p =>
+      (p.place_name||'').toLowerCase().includes(kw) ||
+      (p.address||'').toLowerCase().includes(kw) ||
+      (p.station_name||'').toLowerCase().includes(kw) ||
+      (p.category||'').toLowerCase().includes(kw)
+    );
+  }
+
+  // 정렬
+  if (hp.sort === 'score') list.sort((a,b) => (b.date_score||0)-(a.date_score||0));
+  else list.sort((a,b) => (a.place_name||'').localeCompare(b.place_name||'', 'ko'));
+
+  hp.filtered = list;
+  hp.page = 1;
+
+  document.getElementById('hpTotalCount').textContent = list.length;
+  buildStationSidebar();
+  renderHpGrid();
+  renderHpPagination();
+}
+
+/* ── 그리드 렌더링 ── */
+function renderHpGrid() {
+  const grid = document.getElementById('hpGrid');
+  const start = (hp.page-1)*hp.perPage;
+  const pageData = hp.filtered.slice(start, start+hp.perPage);
+  const kw = hp.keyword;
+
+  document.getElementById('hpResultText').innerHTML =
+    `<span>${hp.filtered.length}</span>곳의 장소${kw ? ` — "<b>${kw}</b>" 검색 결과` : ''}`;
+
+  if (hp.filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="hp-empty">
+        <div class="hp-empty-emoji">🔍</div>
+        <p>${kw ? `"<b>${kw}</b>"에 해당하는 장소가 없어요.<br>다른 검색어를 입력해 보세요.` : '조건에 맞는 장소가 없어요.<br>필터를 바꿔 다시 시도해 보세요.'}</p>
+        <button onclick="resetHpFilters()">전체 초기화</button>
+      </div>`;
+    return;
+  }
+
+  grid.className = `hp-grid${hp.viewMode === 'list' ? ' list-view' : ''}`;
+  grid.innerHTML = pageData.map((p, i) => renderHpCard(p, i, kw)).join('');
+  // 스크롤 맨 위로
+  document.getElementById('hpGridWrap').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderHpCard(p, i, kw) {
+  const emoji = Object.entries(EMOJI_MAP).find(([k]) => (p.category||'').includes(k))?.[1] || '🍽️';
+  const bg = THUMB_COLORS[(p.place_id || i) % THUMB_COLORS.length];
+  const catKey = Object.keys(EMOJI_MAP).find(k => (p.category||'').includes(k)) || '핫플';
+  const isFav = favorites.has(p.place_id);
+  const rank = (hp.page-1)*hp.perPage + i + 1;
+
+  function hl(text) {
+    if (!kw || !text) return text || '';
+    return text.replace(new RegExp(`(${kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<span class="hl">$1</span>');
+  }
+
+  return `
+    <div class="hp-card${hp.viewMode==='list'?' list-view':''}">
+      <div class="hp-card-thumb" style="background:${bg};">
+        <span>${emoji}</span>
+        <div class="hp-card-badges">
+          ${rank <= 3 ? `<span class="hp-card-badge rank">${['🥇','🥈','🥉'][rank-1]} ${rank}위</span>` : ''}
+          <span class="hp-card-badge score">★ ${p.date_score||'-'}</span>
+        </div>
+        <button class="hp-card-fav" onclick="event.stopPropagation();toggleHpFav(${p.place_id},this)">${isFav?'❤️':'🤍'}</button>
+      </div>
+      <div class="hp-card-body">
+        <div class="hp-card-cat-row">
+          <span class="hp-card-cat-pill ${catKey}">${p.category||'기타'}</span>
+          ${p.source_grade ? `<span style="font-size:10px;color:#e65100;font-weight:700;">🏆 ${p.source_grade}</span>` : ''}
+        </div>
+        <div class="hp-card-name">${hl(p.place_name)}</div>
+        <div class="hp-card-stars">
+          ${'★'.repeat(p.date_score||0)}${'☆'.repeat(5-(p.date_score||0))}
+          <span class="score-text">데이트점수 ${p.date_score||'-'}/5</span>
+        </div>
+        <div class="hp-card-addr">📍 ${hl(p.address)||'주소 정보 없음'}</div>
+        <div class="hp-card-station">🚇 ${hl(p.station_name)||''}역 근처</div>
+        ${p.phone ? `<div class="hp-card-phone">📞 ${p.phone}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+/* ── 페이지네이션 ── */
+function renderHpPagination() {
+  const total = hp.filtered.length;
+  const totalPages = Math.ceil(total / hp.perPage);
+  const el = document.getElementById('hpPagination');
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+  let html = `<button class="hp-page-btn" onclick="setHpPage(${hp.page-1})" ${hp.page===1?'disabled':''}>‹</button>`;
+  for (let p = 1; p <= totalPages; p++) {
+    if (p === 1 || p === totalPages || Math.abs(p - hp.page) <= 2) {
+      html += `<button class="hp-page-btn ${p===hp.page?'active':''}" onclick="setHpPage(${p})">${p}</button>`;
+    } else if (Math.abs(p - hp.page) === 3) {
+      html += `<span style="font-size:13px;color:var(--gray4);padding:0 4px;">…</span>`;
+    }
+  }
+  html += `<button class="hp-page-btn" onclick="setHpPage(${hp.page+1})" ${hp.page===totalPages?'disabled':''}>›</button>`;
+  el.innerHTML = html;
+}
+
+/* ── 스켈레톤 ── */
+function showHpSkeleton() {
+  document.getElementById('hpGrid').innerHTML = Array.from({length:8}, () => `
+    <div class="hp-skeleton">
+      <div class="skel-thumb"></div>
+      <div class="skel-body">
+        <div class="skel-line w40"></div>
+        <div class="skel-line w80"></div>
+        <div class="skel-line w60"></div>
+      </div>
+    </div>`).join('');
+  document.getElementById('hpResultText').textContent = '불러오는 중...';
+  document.getElementById('hpTotalCount').textContent = '...';
+}
+
+/* ── 이벤트 핸들러 ── */
+let hpSearchTimer = null;
+function onHpSearchInput(val) {
+  hp.pendingKeyword = val;
+  document.getElementById('hpSearchClear').classList.toggle('visible', val.length > 0);
+  clearTimeout(hpSearchTimer);
+  hpSearchTimer = setTimeout(() => runHpSearch(), 320);
+}
+
+function runHpSearch() {
+  hp.keyword = hp.pendingKeyword.trim();
+  const kwRow = document.getElementById('hpKeywordRow');
+  const kwText = document.getElementById('hpKeywordText');
+  if (hp.keyword) {
+    kwText.textContent = hp.keyword;
+    kwRow.classList.add('visible');
+  } else {
+    kwRow.classList.remove('visible');
+  }
+  applyHpFilters();
+}
+
+function clearHpSearch() {
+  hp.keyword = '';
+  hp.pendingKeyword = '';
+  document.getElementById('hpSearchInput').value = '';
+  document.getElementById('hpSearchClear').classList.remove('visible');
+  document.getElementById('hpKeywordRow').classList.remove('visible');
+  applyHpFilters();
+}
+
+function setHpCategory(cat) {
+  hp.category = cat;
+  document.querySelectorAll('.hp-filter-btn').forEach(b => {
+    const txt = b.textContent.trim().replace(/^[^\s]+\s*/,'').trim();
+    b.classList.toggle('active', b.textContent.trim() === cat || txt === cat);
+  });
+  applyHpFilters();
+}
+
+function setHpSort(s) {
+  hp.sort = s;
+  document.getElementById('hpSortScore').classList.toggle('active', s === 'score');
+  document.getElementById('hpSortName').classList.toggle('active',  s === 'name');
+  applyHpFilters();
+}
+
+function setHpDistrict(d) {
+  hp.district = d;
+  hp.stationFilter = '전체';
+  buildDistrictSidebar();
+  applyHpFilters();
+}
+
+function setHpStation(st) {
+  hp.stationFilter = st;
+  buildStationSidebar();
+  applyHpFilters();
+}
+
+function setHpPage(p) {
+  const totalPages = Math.max(1, Math.ceil(hp.filtered.length / hp.perPage));
+  if (p < 1 || p > totalPages) return;
+  hp.page = p;
+  renderHpGrid();
+  renderHpPagination();
+}
+
+function setHpView(v) {
+  hp.viewMode = v;
+  document.getElementById('viewGrid').classList.toggle('active', v === 'grid');
+  document.getElementById('viewList').classList.toggle('active', v === 'list');
+  renderHpGrid();
+}
+
+function toggleHpFav(id, btn) {
+  if (favorites.has(id)) { favorites.delete(id); btn.textContent = '🤍'; }
+  else { favorites.add(id); btn.textContent = '❤️'; }
+}
+
+function resetHpFilters() {
+  hp.category = '전체';
+  hp.district = '전체';
+  hp.stationFilter = '전체';
+  clearHpSearch();
+  document.querySelectorAll('.hp-filter-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  buildDistrictSidebar();
+  applyHpFilters();
+}
+/* ══════════════════════════════════════════════════════════
+   추천 여행 코스 모달 로직
+══════════════════════════════════════════════════════════ */
+function openCourseModal() {
+  const overlay = document.getElementById('courseOverlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCourseModal() {
+  document.getElementById('courseOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+let currentCourseTab = 0;
+function switchCourseTab(idx) {
+  currentCourseTab = idx;
+
+  // 탭 버튼 active 갱신
+  document.querySelectorAll('.course-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+
+  // 패널 active 갱신
+  document.querySelectorAll('.course-panel').forEach((p, i) => {
+    p.classList.toggle('active', i === idx);
+  });
+
+  // 스크롤 맨 위로
+  document.getElementById('courseBody').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+// ─────────────────────────────────────────
+//  초기화
+// ─────────────────────────────────────────
+window.addEventListener('load', function() {
+  renderSidebar();
+  initKakaoMap();
+  updateLoginUI();
+
+  const authSwitchText = document.getElementById('authSwitchText');
+  if (authSwitchText) {
+    authSwitchText.onclick = function () {
+      authMode = authMode === 'login' ? 'signup' : 'login';
+      updateAuthModal();
+    };
+  }
+
+  selectStation(5);
+
+  // 파일을 처음 실행하면 홈 화면부터 보이게 하고, 역별 탐색 화면은 시작하기 전까지 숨깁니다.
+  const layout = document.querySelector('.layout');
+  const homeOverlay = document.getElementById('homeOverlay');
+  if (layout) layout.style.display = 'none';
+  if (homeOverlay) homeOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (typeof setActiveNav === 'function') setActiveNav('홈');
+});
+</script>
+</body>
+</html>
