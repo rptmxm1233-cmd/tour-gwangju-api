@@ -3023,8 +3023,8 @@ document.addEventListener('keydown', function(e) {
 async function loadAllHotplaces() {
   showHpSkeleton();
   try {
-    const res = await fetch(API_BASE + '/places/all');
-    const data = await res.json();
+    const res = await fetch('/api/restaurants');
+const data = await res.json();
     if (data.success && Array.isArray(data.places)) {
       hp.allPlaces = data.places;
     } else {
