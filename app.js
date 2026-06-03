@@ -73,8 +73,7 @@ app.get('/api/places', async (req, res) => {
       });
     }
 
-    const [rows] = await pool.query(
-  `
+    const [rows] = await pool.query(`
   SELECT
     place_id,
     line_name,
@@ -92,10 +91,16 @@ app.get('/api/places', async (req, res) => {
     naver_place_search_url
   FROM places_unique
   WHERE line_name = ?
-    AND station_name = ?
+    AND (
+      station_name = ?
+      OR station_name = CONCAT(?, '역')
+      OR REPLACE(station_name, '역', '') = ?
+    )
+  ${category ? `AND (category = ? OR place_type = ? OR theme_tags LIKE ?)` : ''}
   ORDER BY place_id ASC
-  `,
-  [line_name, station_name]
+`, category
+  ? [line_name, station_name, station_name, station_name, category, category, `%${category}%`]
+  : [line_name, station_name, station_name, station_name]
 );
 
 res.json(rows);
