@@ -2652,6 +2652,19 @@ onclick="event.stopPropagation();openReviewModal(${i})">
       </div>
     `;
   }).join('');
+  list.querySelectorAll('.place-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const placeId = Number(card.dataset.placeId);
+    const place = currentPlaces.find(p => Number(p.place_id) === placeId);
+
+    if (!place) {
+      console.log('장소를 찾지 못함:', placeId, currentPlaces);
+      return;
+    }
+
+    openNaverMap(place);
+  });
+});
 }
 
 // ─────────────────────────────────────────
